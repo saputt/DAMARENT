@@ -17,6 +17,8 @@ public class Damarent {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        motor mtr=new motor();
+        mtr.setVisible(true);
     }
     
 }
