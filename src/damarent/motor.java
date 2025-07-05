@@ -8,6 +8,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import javax.swing.JOptionPane;
+
 /**
  *
  * @author hm867
@@ -30,11 +31,20 @@ public class motor extends javax.swing.JFrame {
         user = dbsetting.SettingPanel("DBUsername");
         pass = dbsetting.SettingPanel("DBPassword");
         
+        combo_urut.addItem("Harga Termurah");
+        combo_urut.addItem("Harga Termahal");
+
         tabel_motor.setModel(tableMode1);
         
         settableload(); 
+        
+        combo_urutkan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) { 
+                urutkanTabel();
+            }
+        });
     }
-    
+    private javax.swing.JComboBox<String> combo_urut;
     private javax.swing.table.DefaultTableModel tableMode1=getDefaultTabelModel();
     private javax.swing.table.DefaultTableModel getDefaultTabelModel()
     {
@@ -44,7 +54,7 @@ public class motor extends javax.swing.JFrame {
             new String [] 
             {
                 
-                "id motor",
+                "ID motor",
                 "Merk",
                 "Model",
                 "Plat Nomor",
@@ -56,7 +66,7 @@ public class motor extends javax.swing.JFrame {
         {
             boolean[] canEdit = new boolean[]
             {
-                false, false, false, false, false
+                false, false, false, false, false, false
             };
             
             public boolean isCellEditable(int rowIndex, int columnIndex) 
@@ -66,11 +76,10 @@ public class motor extends javax.swing.JFrame {
         };
     }
     
-    String data[] = new String[5];
+    String data[] = new String[6];
     
     private void settableload()
     {
-        String stat = "";
         try 
         {
             Class.forName(driver);
@@ -83,11 +92,12 @@ public class motor extends javax.swing.JFrame {
             ResultSet res = stt.executeQuery(SQL);
             while(res.next())
             {
-                data[0] = res.getString(1);
-                data[1] = res.getString(2);
-                data[2] = res.getString(3);
-                data[3] = res.getString(4);
-                data[4] = res.getString(5);
+                data[0] = res.getString("id_motor");
+                data[1] = res.getString("merk");
+                data[2] = res.getString("model");
+                data[3] = res.getString("plat_nomor");
+                data[4] = res.getString("harga_sewa");
+                data[5] = res.getString("status");
                 tableMode1.addRow(data);
             }
             res.close();
@@ -96,13 +106,30 @@ public class motor extends javax.swing.JFrame {
             
         }
         catch(Exception ex){
-            System.err.println(ex.getMessage());
-            JOptionPane.showMessageDialog(null,
-                        ex.getMessage(),"error",
-                        JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "error", JOptionPane.INFORMATION_MESSAGE);
             System.exit(0);
         }
     }
+    
+    public void urutkanTabel() {
+        tableMode1.setRowCount(0);
+        String orderBy = combo_urutkan.getSelectedItem().toString().equals("Termurah") ? "ASC" : "DESC";
+        try (Connection kon = DriverManager.getConnection(database, user, pass);
+            Statement stt = kon.createStatement();
+            ResultSet res = stt.executeQuery("SELECT * FROM motor ORDER BY harga_sewa " + orderBy)) 
+        {
+            while (res.next()) 
+            {
+            for (int i = 0; i < 6; i++) data[i] = res.getString(i + 1);
+            tableMode1.addRow(data);
+            }
+        }   
+        catch (Exception ex) 
+        {
+        JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+}
+
     
     public void membersihkan_teks()
     {
@@ -125,16 +152,16 @@ public class motor extends javax.swing.JFrame {
     public void tampil_field()
     {
         row = tabel_motor.getSelectedRow();
-        txt_merk.setText(tableMode1.getValueAt(row, 0).toString());
-        txt_model.setText(tableMode1.getValueAt(row, 1).toString());
-        txt_plat.setText(tableMode1.getValueAt(row, 2).toString());
-        txt_harga.setText(tableMode1.getValueAt(row, 3).toString());
-        combo_status.setSelectedItem(tableMode1.getValueAt(row, 4).toString());
+        txt_merk.setText(tableMode1.getValueAt(row, 1).toString());
+        txt_model.setText(tableMode1.getValueAt(row, 2).toString());
+        txt_plat.setText(tableMode1.getValueAt(row, 3).toString());
+        txt_harga.setText(tableMode1.getValueAt(row, 4).toString());
+        combo_status.setSelectedItem(tableMode1.getValueAt(row, 5).toString());
         
         btn_simpan.setEnabled(false);
         btn_ubah.setEnabled(true);
         btn_hapus.setEnabled(true);
-        btn_batal.setEnabled(false);
+        btn_batal.setEnabled(true);
         aktif_teks();   
     }
     
@@ -247,7 +274,7 @@ public class motor extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btn_cari, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btn_tampil, javax.swing.GroupLayout.PREFERRED_SIZE, 264, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btn_tampil)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -361,7 +388,7 @@ public class motor extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txt_model, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txt_merk, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel4)
                     .addComponent(jLabel6))
@@ -461,77 +488,62 @@ public class motor extends javax.swing.JFrame {
 
     private void btn_simpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_simpanActionPerformed
         // TODO add your handling code here:
-        String data[] = new String[5];
-        
         if ((txt_merk.getText().isEmpty()) || (txt_plat.getText().isEmpty()))
         {
             JOptionPane.showMessageDialog(null,
                             "data tidak boleh kosong, silahkan dilengkapi");
-            txt_merk.requestFocus();
+            return;
         }
-        else
-        {
-            try
+
+            try(Connection kon = DriverManager.getConnection(database, user, pass);
+                Statement stt = kon.createStatement())
             {
-                Class.forName(driver);
-                Connection kon = DriverManager.getConnection(
-                                    database,
-                                    user,
-                                    pass);
-                Statement stt = kon.createStatement();
-                String statusValue = combo_status.getSelectedItem().toString();
-                String SQL = "INSERT INTO motor (merk, model, plat_nomor, harga_sewa, status) "
-                                    + "VALUES "
-                                    + "('" + txt_merk.getText() + "', "
-                                    + " ' " + txt_model.getText() + "', "
-                                    + " ' " + txt_plat.getText() + "', "
-                                    + " ' " + txt_harga.getText() + " ', "
-                                    + " ' " + statusValue + " ') ";
+                String SQL = String.format("INSERT INTO motor (merk, model, plat_nomor, harga_sewa, status) ) VALUES ('%s','%s','%s','%s','%s')",
+                                    txt_merk.getText(), 
+                                    txt_model.getText(), 
+                                    txt_plat.getText(), 
+                                    txt_harga.getText(), 
+                                    combo_status.getSelectedItem().toString());
                 stt.executeUpdate(SQL);
-                data[0] = txt_merk.getText();
-                data[1] = txt_model.getText();
-                data[2] = txt_plat.getText();
-                data[3] = txt_harga.getText();
-                data[4] = statusValue;
+                
+                data[1] = txt_merk.getText();
+                data[2] = txt_model.getText();
+                data[3] = txt_plat.getText();
+                data[4] = txt_harga.getText();
+                data[5] = combo_status.getSelectedItem().toString();
                 tableMode1.insertRow(0, data);
-                stt.close();
-                kon.close();
+                
                 membersihkan_teks();
-                btn_simpan.setEnabled(false);
                 nonaktif_teks();
+                btn_simpan.setEnabled(false);
                 
                 JOptionPane.showMessageDialog(null,
                         "Data Berhasil Disimpan!");
             }
             catch (Exception ex)
             {
-                JOptionPane.showMessageDialog(null,
-                        ex.getMessage(),"error",
-                        JOptionPane.INFORMATION_MESSAGE);
-                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, ex.getMessage(),"error", JOptionPane.ERROR_MESSAGE);
             }
-        }                                          
+                                                  
     }//GEN-LAST:event_btn_simpanActionPerformed
 
     private void btn_hapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_hapusActionPerformed
         // TODO add your handling code here:
-        try
+        try (Connection kon = DriverManager.getConnection(database,user,pass);
+            Statement stt = kon.createStatement())
         {
-            Class.forName(driver);
-            Connection kon = DriverManager.getConnection(database,user,pass);
-            Statement stt = kon.createStatement();
-            String SQL = "DELETE FROM `motor`"
-                        + "WHERE "
-                        + "`plat`='"+tableMode1.getValueAt(row, 0).toString()+"'";
-            stt.executeUpdate(SQL);
+            String id = tableMode1.getValueAt(row, 0).toString();
+            stt.executeUpdate("DELETE FROM motor WHERE id_motor='"+ id +"'");
             tableMode1.removeRow(row);
-            stt.close();
-            kon.close();
+            
             membersihkan_teks();
+            nonaktif_teks();
+            btn_ubah.setEnabled(false);
+            btn_hapus.setEnabled(false);
         }
         catch (Exception ex)
         {
-            System.err.println(ex.getMessage());
+            JOptionPane.showMessageDialog(null, ex.getMessage(),"error", JOptionPane.ERROR_MESSAGE);
         }
         
     }//GEN-LAST:event_btn_hapusActionPerformed
@@ -546,88 +558,62 @@ public class motor extends javax.swing.JFrame {
 
     private void btn_ubahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_ubahActionPerformed
         // TODO add your handling code here:
-        String merk=txt_merk.getText();
-        String model=txt_model.getText();
-        String plat=txt_plat.getText();
-        String harga=txt_harga.getText();
-        String status=combo_status.getSelectedItem().toString();
+        try (Connection kon = DriverManager.getConnection(database,user,pass);
+            Statement stt = kon.createStatement())
+        {
+            String id = tableMode1.getValueAt(row, 0).toString();
+            stt.executeUpdate(
+                "UPDATE  motor SET "+
+                "merk='"+txt_merk.getText()+"',"+
+                "model='"+txt_model.getText()+"',"+
+                "plat_nomor='"+txt_plat.getText()+"',"+
+                "harga_sewa='"+txt_harga.getText()+"',"+
+                "status='"+combo_status.getSelectedItem().toString()+"' "+
+                "WHERE id_motor='"+id+"'");
+       
+        data[0] = id;
+        data[1] = txt_merk.getText();
+        data[2] = txt_model.getText();
+        data[3] = txt_plat.getText();
+        data[4] = txt_harga.getText();
+        data[5] = combo_status.getSelectedItem().toString();
+        tableMode1.removeRow(row);
+        tableMode1.insertRow(row,data);
         
-        if((merk.isEmpty()) | (plat.isEmpty()))
-        {
-            JOptionPane.showMessageDialog(null, "Data tidak boleh kosong, silahkan ulangi..");
-            txt_merk.requestFocus();
+        membersihkan_teks();
+        nonaktif_teks();
+        btn_ubah.setEnabled(false);
+        btn_hapus.setEnabled(false);
+       
         }
-        else
-        {
-            try
+        catch (Exception ex)
             {
-                Class.forName(driver);
-                Connection kon = DriverManager.getConnection(database,user,pass);
-                Statement stt = kon.createStatement();
-                String SQL = "UPDATE `motor`"
-                            + "SET `merk`='"+merk+"',"
-                            + "`model`='"+model+"',"
-                            + "`plat`='"+plat+"',"
-                            + "`harga`='"+harga+"',"
-                            + "`status`='"+status+"'"
-                        + "WHERE "
-                        + "`plat`='"+tableMode1.getValueAt(row, 0).toString() +"';";
-                stt.executeUpdate(SQL);
-                data[0] = merk;
-                data[1] = model;
-                data[2] = plat;
-                data[3] = harga;
-                data[4] = status;
-                tableMode1.removeRow(row);
-                tableMode1.insertRow(row,data);
-                stt.close();
-                kon.close();
-                membersihkan_teks();
-                btn_simpan.setEnabled(false);
-                nonaktif_teks();
+            JOptionPane.showMessageDialog(null, ex.getMessage(),"error", JOptionPane.ERROR_MESSAGE);
             }
-            catch (Exception ex)
-            {
-                System.err.println(ex.getMessage());
-                ex.printStackTrace();
-            }
-        }
+        
     }//GEN-LAST:event_btn_ubahActionPerformed
 
     private void btn_cariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_cariActionPerformed
         // TODO add your handling code here:
         tableMode1.setRowCount(0);
-        try
+        String kata = txt_cari.getText();
+        String kolom = combo_kategori.getSelectedItem().toString().replace(" ", "_").toLowerCase();
+        
+        try (Connection kon = DriverManager.getConnection(database,user,pass);
+            Statement stt = kon.createStatement();
+            ResultSet res = stt.executeQuery(
+                "SELECT * FROM motor WHERE "+ kolom +"LIKE '%"+ kata +"%'"))
         {
-            Class.forName(driver);
-            Connection kon = DriverManager.getConnection(
-                    database,
-                    user,
-                    pass
-            );
-            Statement stt=kon.createStatement();
-            String SQL = "SELECT * FROM motor WHERE merk=" + txt_cari.getText();
-            ResultSet res = stt.executeQuery(SQL);
-            while(res.next())
+            while (res.next())
             {
-                data[0] = res.getString(1);
-                data[1] = res.getString(2);
-                data[2] = res.getString(3);
-                data[3] = res.getString(4);
-                data[4] = res.getString(5);
+                for(int i = 0;i<6;i++) data[i] = res.getString(i+1);
                 tableMode1.addRow(data);
-            } 
-            res.close();
-            stt.close();
-            kon.close();
+            }
         }
+        
         catch (Exception ex)
         {
-            System.err.println(ex.getMessage());
-            JOptionPane.showMessageDialog(null,
-                    ex.getMessage(),"error",
-                    JOptionPane.INFORMATION_MESSAGE);
-            System.exit(0);
+            JOptionPane.showMessageDialog(null, ex.getMessage(),"error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btn_cariActionPerformed
 

@@ -34,7 +34,7 @@
                   <Component id="txt_model" min="-2" pref="140" max="-2" attributes="0"/>
                   <Component id="txt_merk" min="-2" pref="140" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace pref="28" max="32767" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
                   <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
@@ -189,7 +189,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btn_cari" min="-2" pref="101" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btn_tampil" min="-2" pref="264" max="-2" attributes="0"/>
+                  <Component id="btn_tampil" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="jLabel9" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
