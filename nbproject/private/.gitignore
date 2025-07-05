@@ -1,0 +1,30 @@
+# Abaikan file NetBeans pribadi (PENTING untuk kasus Anda!)
+nbproject/private/
+
+# File Java yang sudah dikompilasi
+*.class
+
+# File package (JAR, WAR, EAR)
+*.jar
+*.war
+*.ear
+
+# File log
+*.log
+logs/
+
+# Direktori hasil build
+build/
+dist/
+target/ # Jika pakai Maven atau Gradle
+
+# File spesifik IDE lain (jika ada rekan tim pakai IDE berbeda)
+.idea/          # IntelliJ IDEA
+.vscode/        # VS Code
+.classpath      # Eclipse
+.project        # Eclipse
+.settings/      # Eclipse
+
+# File sistem operasi
+.DS_Store       # macOS
+Thumbs.db       # Windows
