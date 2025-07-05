@@ -36,7 +36,6 @@ public class sewa extends javax.swing.JFrame {
     Object tabel;
     
     /**
-     * Creates new form frm_mhs
      */
     public sewa() {
         initComponents();
@@ -199,25 +198,26 @@ public class sewa extends javax.swing.JFrame {
             // *** PERHATIAN: QUERY SQL INI ADALAH KUNCI ***
             // Ini adalah query JOIN yang sama seperti yang kita bahas sebelumnya
             String SQL = "SELECT " +
-                         "    s.id_sewa, " +
-                         "    p.nama_pelanggan, " +
-                         "    m.merk, " +
-                         "    m.model, " +
-                         "    m.plat_nomor, " +
-                         "    s.tanggal_peminjaman, " +
-                         "    s.tanggal_kembali, " + // Mengambil dari kolom 'tanggal_kembali' di tabel sewa Anda
-                         "    s.durasi_sewa_jam, " +
-                         "    s.status_sewa, " +
-                         "    s.total_denda, " +      // Mengambil dari kolom 'total_denda' di tabel sewa Anda
-                         "    s.total_keseluruhan " + // Mengambil dari kolom 'total_keseluruhan' di tabel sewa Anda
+                         "    id_sewa, " +
+                         "    pengguna.nama_pelanggan, " +
+                         "    motor.merk, " +
+                         "    motor.model, " +
+                         "    motor.plat_nomor, " +
+                         "    tanggal_peminjaman, " +
+                         "    tanggal_kembali, " + // Mengambil dari kolom 'tanggal_kembali' di tabel sewa Anda
+                         "    durasi_sewa_hari, " +
+                         "    status_sewa, " +
+                         "    total_bayar_sewa, " +
+                         "    total_denda, " +      // Mengambil dari kolom 'total_denda' di tabel sewa Anda
+                         "    total_keseluruhan " + // Mengambil dari kolom 'total_keseluruhan' di tabel sewa Anda
                          "FROM " +
-                         "    sewa s " +
+                         "    sewa " +
                          "JOIN " +
-                         "    pengguna p ON s.id_pengguna = p.id_pengguna " +
+                         "    pengguna ON sewa.id_pengguna = pengguna.id_pengguna " +
                          "JOIN " +
-                         "    motor m ON s.id_motor = m.id_motor " +
+                         "    motor ON sewa.id_motor = motor.id_motor " +
                          "ORDER BY " +
-                         "    s.tanggal_peminjaman DESC";
+                         "    sewa.tanggal_peminjaman DESC";
 
             res = stt.executeQuery(SQL);
 
@@ -541,10 +541,8 @@ public class sewa extends javax.swing.JFrame {
                             .addComponent(jLabel6)
                             .addComponent(combo_status, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel2)
-                            .addComponent(combo_penyewa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(jam_diambil, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -554,7 +552,10 @@ public class sewa extends javax.swing.JFrame {
                                     .addComponent(menit_diambil, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel12)
                                     .addComponent(jLabel5)))
-                            .addComponent(jLabel9))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel2)
+                                .addComponent(combo_penyewa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel9)))
                         .addGap(15, 15, 15)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(combo_motor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
