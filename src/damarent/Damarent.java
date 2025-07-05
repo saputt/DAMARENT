@@ -17,8 +17,7 @@ public class Damarent {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        sewa sewa=new sewa();
-        sewa.setVisible(true);
+        
     }
     
 }
