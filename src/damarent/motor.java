@@ -31,8 +31,8 @@ public class motor extends javax.swing.JFrame {
         user = dbsetting.SettingPanel("DBUsername");
         pass = dbsetting.SettingPanel("DBPassword");
         
-        combo_urut.addItem("Harga Termurah");
-        combo_urut.addItem("Harga Termahal");
+        combo_urutkan.addItem("Harga Termurah");
+        combo_urutkan.addItem("Harga Termahal");
 
         tabel_motor.setModel(tableMode1);
         
@@ -259,6 +259,11 @@ public class motor extends javax.swing.JFrame {
         jLabel9.setText("Urutkan");
 
         combo_urutkan.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Termurah", "Termahal" }));
+        combo_urutkan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                combo_urutkanActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -622,6 +627,10 @@ public class motor extends javax.swing.JFrame {
         tableMode1.setRowCount(0);
         settableload();
     }//GEN-LAST:event_btn_tampilActionPerformed
+
+    private void combo_urutkanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_combo_urutkanActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_combo_urutkanActionPerformed
 
     /**
      * @param args the command line arguments
