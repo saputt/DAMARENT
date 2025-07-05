@@ -3,18 +3,148 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package damarent;
-
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import javax.swing.JOptionPane;
 /**
  *
  * @author hm867
  */
 public class motor extends javax.swing.JFrame {
+    
+    koneksi dbsetting;
+    String driver,database,user,pass;
+    Object tabel;
 
     /**
      * Creates new form motor
      */
     public motor() {
         initComponents();
+        
+        dbsetting = new koneksi();
+        driver = dbsetting.SettingPanel("DBDriver");
+        database = dbsetting.SettingPanel("DBDatabase");
+        user = dbsetting.SettingPanel("DBUsername");
+        pass = dbsetting.SettingPanel("DBPassword");
+        
+        tabel_motor.setModel(tableMode1);
+        
+        settableload(); 
+    }
+    
+    private javax.swing.table.DefaultTableModel tableMode1=getDefaultTabelModel();
+    private javax.swing.table.DefaultTableModel getDefaultTabelModel()
+    {
+        return new javax.swing.table.DefaultTableModel
+        (
+            new Object[][] {},
+            new String [] 
+            {
+                
+                "id motor",
+                "Merk",
+                "Model",
+                "Plat Nomor",
+                "Harga Sewa",
+                "Status"
+            }
+        )
+        
+        {
+            boolean[] canEdit = new boolean[]
+            {
+                false, false, false, false, false
+            };
+            
+            public boolean isCellEditable(int rowIndex, int columnIndex) 
+            {
+                return canEdit[columnIndex];
+            }
+        };
+    }
+    
+    String data[] = new String[5];
+    
+    private void settableload()
+    {
+        String stat = "";
+        try 
+        {
+            Class.forName(driver);
+            Connection kon = DriverManager.getConnection(
+                             database,
+                             user,
+                             pass);
+            Statement stt=kon.createStatement();
+            String SQL = "select * from motor";
+            ResultSet res = stt.executeQuery(SQL);
+            while(res.next())
+            {
+                data[0] = res.getString(1);
+                data[1] = res.getString(2);
+                data[2] = res.getString(3);
+                data[3] = res.getString(4);
+                data[4] = res.getString(5);
+                tableMode1.addRow(data);
+            }
+            res.close();
+            stt.close();
+            kon.close();
+            
+        }
+        catch(Exception ex){
+            System.err.println(ex.getMessage());
+            JOptionPane.showMessageDialog(null,
+                        ex.getMessage(),"error",
+                        JOptionPane.INFORMATION_MESSAGE);
+            System.exit(0);
+        }
+    }
+    
+    public void membersihkan_teks()
+    {
+        txt_merk.setText("");
+        txt_model.setText("");
+        txt_plat.setText("");
+        txt_harga.setText("");
+        combo_status.setSelectedItem(null);
+    }
+    public void aktif_teks()
+    {
+        txt_merk.setEnabled(true);
+        txt_model.setEnabled(true);
+        txt_plat.setEnabled(true);
+        txt_harga.setEnabled(true);
+        combo_status.setEnabled(true);
+    }
+    
+    int row = 0;
+    public void tampil_field()
+    {
+        row = tabel_motor.getSelectedRow();
+        txt_merk.setText(tableMode1.getValueAt(row, 0).toString());
+        txt_model.setText(tableMode1.getValueAt(row, 1).toString());
+        txt_plat.setText(tableMode1.getValueAt(row, 2).toString());
+        txt_harga.setText(tableMode1.getValueAt(row, 3).toString());
+        combo_status.setSelectedItem(tableMode1.getValueAt(row, 4).toString());
+        
+        btn_simpan.setEnabled(false);
+        btn_ubah.setEnabled(true);
+        btn_hapus.setEnabled(true);
+        btn_batal.setEnabled(false);
+        aktif_teks();   
+    }
+    
+    public void nonaktif_teks()
+    {
+        txt_merk.setEnabled(false);
+        txt_model.setEnabled(false);
+        txt_plat.setEnabled(false);
+        txt_harga.setEnabled(false);
+        combo_status.setEnabled(false);
     }
 
     /**
@@ -41,14 +171,12 @@ public class motor extends javax.swing.JFrame {
         btn_simpan = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
         btn_ubah = new javax.swing.JButton();
-        jLabel5 = new javax.swing.JLabel();
         btn_hapus = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
         btn_batal = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
         txt_model = new javax.swing.JTextField();
         txt_plat = new javax.swing.JTextField();
-        txt_warna = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         txt_harga = new javax.swing.JTextField();
@@ -87,8 +215,18 @@ public class motor extends javax.swing.JFrame {
         combo_kategori.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Merk", "Model", "Plat Nomor", "Warna", "Status" }));
 
         btn_cari.setText("Cari");
+        btn_cari.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_cariActionPerformed(evt);
+            }
+        });
 
         btn_tampil.setText("Tampilkan Semua Data");
+        btn_tampil.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_tampilActionPerformed(evt);
+            }
+        });
 
         jLabel9.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel9.setText("Urutkan");
@@ -132,16 +270,28 @@ public class motor extends javax.swing.JFrame {
         );
 
         btn_simpan.setText("Simpan");
+        btn_simpan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_simpanActionPerformed(evt);
+            }
+        });
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel4.setText("Plat Nomor");
 
         btn_ubah.setText("Ubah");
-
-        jLabel5.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jLabel5.setText("Warna");
+        btn_ubah.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_ubahActionPerformed(evt);
+            }
+        });
 
         btn_hapus.setText("Hapus");
+        btn_hapus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_hapusActionPerformed(evt);
+            }
+        });
 
         jLabel6.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel6.setText("Harga Sewa");
@@ -185,6 +335,11 @@ public class motor extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tabel_motor.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tabel_motorMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tabel_motor);
 
         txt_merk.addActionListener(new java.awt.event.ActionListener() {
@@ -202,34 +357,27 @@ public class motor extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2)
                     .addComponent(jLabel3))
-                .addGap(38, 38, 38)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txt_merk, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(1, 1, 1)
-                        .addComponent(txt_model, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(27, 27, 27)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(txt_model, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txt_merk, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel4)
-                    .addComponent(jLabel5))
+                    .addComponent(jLabel6))
                 .addGap(33, 33, 33)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txt_plat, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txt_warna, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(36, 36, 36)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel6)
-                    .addComponent(jLabel7))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txt_harga, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(combo_status, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(59, 59, 59))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(txt_harga, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(342, 342, 342))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(txt_plat, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(72, 72, 72)
+                        .addComponent(jLabel7)
+                        .addGap(30, 30, 30)
+                        .addComponent(combo_status, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(51, 51, 51))))
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1)
-                .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addGap(246, 246, 246)
                 .addComponent(btn_tambah)
@@ -243,46 +391,42 @@ public class motor extends javax.swing.JFrame {
                 .addComponent(btn_batal)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(txt_harga)
-                                .addComponent(jLabel6))
-                            .addGap(19, 19, 19)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(combo_status, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel7))
-                            .addGap(3, 3, 3))
-                        .addGroup(layout.createSequentialGroup()
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabel4)
-                                .addComponent(txt_plat, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addComponent(jLabel5)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txt_warna, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(jLabel2)
-                            .addGap(27, 27, 27)
-                            .addComponent(jLabel3))
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(txt_merk, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(15, 15, 15)
-                            .addComponent(txt_model, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(22, 22, 22)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(txt_plat, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(txt_merk, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING))
+                                .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING))
+                            .addComponent(combo_status, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txt_model, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel6)
+                            .addComponent(txt_harga, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(21, 21, 21)
+                        .addComponent(jLabel2)
+                        .addGap(27, 27, 27)
+                        .addComponent(jLabel3)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 37, Short.MAX_VALUE)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -301,6 +445,12 @@ public class motor extends javax.swing.JFrame {
 
     private void btn_tambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_tambahActionPerformed
         // TODO add your handling code here:
+        membersihkan_teks();
+        txt_merk.requestFocus();
+        btn_simpan.setEnabled(true);
+        btn_ubah.setEnabled(false);
+        btn_hapus.setEnabled(false);
+        aktif_teks();
     }//GEN-LAST:event_btn_tambahActionPerformed
 
     private void txt_cariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_cariActionPerformed
@@ -310,6 +460,184 @@ public class motor extends javax.swing.JFrame {
     private void txt_merkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_merkActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txt_merkActionPerformed
+
+    private void btn_simpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_simpanActionPerformed
+        // TODO add your handling code here:
+        String data[] = new String[5];
+        
+        if ((txt_merk.getText().isEmpty()) || (txt_plat.getText().isEmpty()))
+        {
+            JOptionPane.showMessageDialog(null,
+                            "data tidak boleh kosong, silahkan dilengkapi");
+            txt_merk.requestFocus();
+        }
+        else
+        {
+            try
+            {
+                Class.forName(driver);
+                Connection kon = DriverManager.getConnection(
+                                    database,
+                                    user,
+                                    pass);
+                Statement stt = kon.createStatement();
+                String statusValue = combo_status.getSelectedItem().toString();
+                String SQL = "INSERT INTO motor (merk, model, plat_nomor, harga_sewa, status) "
+                                    + "VALUES "
+                                    + "('" + txt_merk.getText() + "', "
+                                    + " ' " + txt_model.getText() + "', "
+                                    + " ' " + txt_plat.getText() + "', "
+                                    + " ' " + txt_harga.getText() + " ', "
+                                    + " ' " + statusValue + " ') ";
+                stt.executeUpdate(SQL);
+                data[0] = txt_merk.getText();
+                data[1] = txt_model.getText();
+                data[2] = txt_plat.getText();
+                data[3] = txt_harga.getText();
+                data[4] = statusValue;
+                tableMode1.insertRow(0, data);
+                stt.close();
+                kon.close();
+                membersihkan_teks();
+                btn_simpan.setEnabled(false);
+                nonaktif_teks();
+                
+                JOptionPane.showMessageDialog(null,
+                        "Data Berhasil Disimpan!");
+            }
+            catch (Exception ex)
+            {
+                JOptionPane.showMessageDialog(null,
+                        ex.getMessage(),"error",
+                        JOptionPane.INFORMATION_MESSAGE);
+                ex.printStackTrace();
+            }
+        }                                          
+    }//GEN-LAST:event_btn_simpanActionPerformed
+
+    private void btn_hapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_hapusActionPerformed
+        // TODO add your handling code here:
+        try
+        {
+            Class.forName(driver);
+            Connection kon = DriverManager.getConnection(database,user,pass);
+            Statement stt = kon.createStatement();
+            String SQL = "DELETE FROM `motor`"
+                        + "WHERE "
+                        + "`plat`='"+tableMode1.getValueAt(row, 0).toString()+"'";
+            stt.executeUpdate(SQL);
+            tableMode1.removeRow(row);
+            stt.close();
+            kon.close();
+            membersihkan_teks();
+        }
+        catch (Exception ex)
+        {
+            System.err.println(ex.getMessage());
+        }
+        
+    }//GEN-LAST:event_btn_hapusActionPerformed
+
+    private void tabel_motorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabel_motorMouseClicked
+        // TODO add your handling code here:
+        if(evt.getClickCount()== 1)
+        {
+            tampil_field();
+        }
+    }//GEN-LAST:event_tabel_motorMouseClicked
+
+    private void btn_ubahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_ubahActionPerformed
+        // TODO add your handling code here:
+        String merk=txt_merk.getText();
+        String model=txt_model.getText();
+        String plat=txt_plat.getText();
+        String harga=txt_harga.getText();
+        String status=combo_status.getSelectedItem().toString();
+        
+        if((merk.isEmpty()) | (plat.isEmpty()))
+        {
+            JOptionPane.showMessageDialog(null, "Data tidak boleh kosong, silahkan ulangi..");
+            txt_merk.requestFocus();
+        }
+        else
+        {
+            try
+            {
+                Class.forName(driver);
+                Connection kon = DriverManager.getConnection(database,user,pass);
+                Statement stt = kon.createStatement();
+                String SQL = "UPDATE `motor`"
+                            + "SET `merk`='"+merk+"',"
+                            + "`model`='"+model+"',"
+                            + "`plat`='"+plat+"',"
+                            + "`harga`='"+harga+"',"
+                            + "`status`='"+status+"'"
+                        + "WHERE "
+                        + "`plat`='"+tableMode1.getValueAt(row, 0).toString() +"';";
+                stt.executeUpdate(SQL);
+                data[0] = merk;
+                data[1] = model;
+                data[2] = plat;
+                data[3] = harga;
+                data[4] = status;
+                tableMode1.removeRow(row);
+                tableMode1.insertRow(row,data);
+                stt.close();
+                kon.close();
+                membersihkan_teks();
+                btn_simpan.setEnabled(false);
+                nonaktif_teks();
+            }
+            catch (Exception ex)
+            {
+                System.err.println(ex.getMessage());
+                ex.printStackTrace();
+            }
+        }
+    }//GEN-LAST:event_btn_ubahActionPerformed
+
+    private void btn_cariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_cariActionPerformed
+        // TODO add your handling code here:
+        tableMode1.setRowCount(0);
+        try
+        {
+            Class.forName(driver);
+            Connection kon = DriverManager.getConnection(
+                    database,
+                    user,
+                    pass
+            );
+            Statement stt=kon.createStatement();
+            String SQL = "SELECT * FROM motor WHERE merk=" + txt_cari.getText();
+            ResultSet res = stt.executeQuery(SQL);
+            while(res.next())
+            {
+                data[0] = res.getString(1);
+                data[1] = res.getString(2);
+                data[2] = res.getString(3);
+                data[3] = res.getString(4);
+                data[4] = res.getString(5);
+                tableMode1.addRow(data);
+            } 
+            res.close();
+            stt.close();
+            kon.close();
+        }
+        catch (Exception ex)
+        {
+            System.err.println(ex.getMessage());
+            JOptionPane.showMessageDialog(null,
+                    ex.getMessage(),"error",
+                    JOptionPane.INFORMATION_MESSAGE);
+            System.exit(0);
+        }
+    }//GEN-LAST:event_btn_cariActionPerformed
+
+    private void btn_tampilActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_tampilActionPerformed
+        // TODO add your handling code here:
+        tableMode1.setRowCount(0);
+        settableload();
+    }//GEN-LAST:event_btn_tampilActionPerformed
 
     /**
      * @param args the command line arguments
@@ -361,7 +689,6 @@ public class motor extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
@@ -375,6 +702,5 @@ public class motor extends javax.swing.JFrame {
     private javax.swing.JTextField txt_merk;
     private javax.swing.JTextField txt_model;
     private javax.swing.JTextField txt_plat;
-    private javax.swing.JTextField txt_warna;
     // End of variables declaration//GEN-END:variables
 }
