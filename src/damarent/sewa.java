@@ -12,6 +12,16 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import javax.swing.JOptionPane;
 
+import javax.swing.*;
+import com.toedter.calendar.JDateChooser; // Import JDateChooser
+import java.awt.*; // Untuk Layout Manager, Font, Insets
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Date;
+import java.util.Calendar;
+import java.sql.Timestamp; // Penting untuk menyimpan DATETIME ke MySQL
+import java.text.SimpleDateFormat; // Untuk memformat tampilan tanggal/waktu
+
 /**
  *
  * @author sauki
@@ -33,77 +43,10 @@ public class sewa extends javax.swing.JFrame {
         database = dbsetting.SettingPanel("DBDatabase");
         user = dbsetting.SettingPanel("DBUsername");
         pass = dbsetting.SettingPanel("DBPassword");
-        
-        tabel_sewa.setModel(tableMode1);
-        
-        settableload();
+
     }
     
-    private javax.swing.table.DefaultTableModel tableMode1=getDefaultTabelModel();
-    private javax.swing.table.DefaultTableModel getDefaultTabelModel()
-    {
-        return new javax.swing.table.DefaultTableModel
-        (
-            new Object[][] {},
-            new String [] 
-            {
-                "ID Sewa",
-                "ID Pelanggan",
-                "ID Motor",
-                "Tanggal Sewa",
-                "Tanggal Kembali"
-            }
-        )
-        
-        {
-            boolean[] canEdit = new boolean[]
-            {
-                false, false, false, false, false
-            };
-            
-            public boolean isCellEditable(int rowIndex, int columnIndex) 
-            {
-                return canEdit[columnIndex];
-            }
-        };
-    }
-    
-    String data[] = new String[5];
-    private void settableload()
-    {
-        String stat = "";
-        try 
-        {
-            Class.forName(driver);
-            Connection kon = DriverManager.getConnection(
-                             database,
-                             user,
-                             pass);
-            Statement stt=kon.createStatement();
-            String SQL = "select * from t_mahasiswa";
-            ResultSet res = stt.executeQuery(SQL);
-            while(res.next())
-            {
-                data[0] = res.getString(1);
-                data[1] = res.getString(2);
-                data[2] = res.getString(3);
-                data[3] = res.getString(4);
-                data[4] = res.getString(5);
-                tableMode1.addRow(data);
-            }
-            res.close();
-            stt.close();
-            kon.close();
-            
-        }
-        catch(Exception ex){
-            System.err.println(ex.getMessage());
-            JOptionPane.showMessageDialog(null,
-                        ex.getMessage(),"error",
-                        JOptionPane.INFORMATION_MESSAGE);
-            System.exit(0);
-        }
-    }
+   
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -136,6 +79,7 @@ public class sewa extends javax.swing.JFrame {
         combo_kategori = new javax.swing.JComboBox();
         btn_cari = new javax.swing.JButton();
         btn_tampil = new javax.swing.JButton();
+        jDateChooser1 = new com.toedter.calendar.JDateChooser();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -320,7 +264,9 @@ public class sewa extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(97, 97, 97)
+                                .addComponent(jScrollPane1))
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel2)
@@ -335,9 +281,12 @@ public class sewa extends javax.swing.JFrame {
                                     .addComponent(jLabel5))
                                 .addGap(17, 17, 17)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(txt_ambil, javax.swing.GroupLayout.PREFERRED_SIZE, 335, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(txt_ambil, javax.swing.GroupLayout.PREFERRED_SIZE, 335, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addComponent(txt_kembali, javax.swing.GroupLayout.PREFERRED_SIZE, 335, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 18, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel6)
                                     .addComponent(jLabel7))
@@ -367,11 +316,16 @@ public class sewa extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel6)
-                            .addComponent(combo_terlambat, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txt_ambil, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(15, 15, 15)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel6)
+                                    .addComponent(combo_terlambat, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txt_ambil, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(15, 15, 15))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(combo_kerusakan, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel7)
@@ -526,6 +480,7 @@ public class sewa extends javax.swing.JFrame {
     private javax.swing.JComboBox combo_kategori;
     private javax.swing.JComboBox combo_kerusakan;
     private javax.swing.JComboBox combo_terlambat;
+    private com.toedter.calendar.JDateChooser jDateChooser1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
