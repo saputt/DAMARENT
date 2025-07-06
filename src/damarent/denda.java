@@ -47,9 +47,9 @@ public class denda extends javax.swing.JFrame {
             {
                 "ID Denda",
                 "ID Sewa",
-                "Nama Penyewa", // Ini akan diambil dari JOIN
+                "Nama Penyewa", 
                 "Jenis Denda",
-                "Jumlah Denda", // Tambahkan kolom Jumlah Denda sesuai skema Anda
+                "Jumlah Denda",
                 "Keterangan Denda"
             }
         )
@@ -79,20 +79,20 @@ public class denda extends javax.swing.JFrame {
                              pass);
             Statement stt=kon.createStatement();
             String SQL = "SELECT " +
-                     "    ds.id_denda, " + // Gunakan alias ds untuk denda
-                     "    ds.id_sewa, " + // Gunakan alias ds untuk denda
-                     "    p.nama_pelanggan, " + // Gunakan alias p untuk pengguna
-                     "    ds.jenis_denda, " +
-                     "    ds.jumlah_denda, " +
-                     "    ds.keterangan_denda " + // Asumsi nama kolom di DB adalah keterangan_denda
+                     "    id_denda, " + 
+                     "    denda.id_sewa, " +
+                     "    pelanggan.nama_pelanggan, " +
+                     "    jenis_denda, " +
+                     "    jumlah_denda, " +
+                     "    keterangan_denda " +
                      "FROM " +
-                     "    denda ds " + // Beri alias 'ds' untuk tabel 'denda'
+                     "    denda " +
                      "JOIN " +
-                     "    sewa s ON ds.id_sewa = s.id_sewa " + // Beri alias 's' untuk tabel 'sewa'
+                     "    sewa ON denda.id_sewa = sewa.id_sewa " +
                      "JOIN " +
-                     "    pengguna p ON s.id_pengguna = p.id_pengguna " + // Beri alias 'p' untuk tabel 'pengguna'
+                     "    pelanggan ON sewa.id_pelanggan = pelanggan.id_pelanggan " + 
                      "ORDER BY " +
-                     "    ds.id_denda DESC";
+                     "    id_denda DESC";
             ResultSet res = stt.executeQuery(SQL);
             while(res.next())
             {
@@ -151,7 +151,12 @@ public class denda extends javax.swing.JFrame {
         btn_cari = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+        });
 
         combo_sort.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Termahal", "Termurah", " " }));
         combo_sort.addActionListener(new java.awt.event.ActionListener() {
@@ -360,6 +365,12 @@ public class denda extends javax.swing.JFrame {
     private void btn_cariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_cariActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btn_cariActionPerformed
+
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        // TODO add your handling code here:
+        menu_utama utama = new menu_utama();
+        utama.setVisible(true);
+    }//GEN-LAST:event_formWindowClosed
 
     /**
      * @param args the command line arguments
