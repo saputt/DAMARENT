@@ -46,6 +46,17 @@ public class sewa extends javax.swing.JFrame {
         user = dbsetting.SettingPanel("DBUsername");
         pass = dbsetting.SettingPanel("DBPassword");
         
+        SpinnerModel hourModel = new SpinnerNumberModel(0, 0, 23, 1); // initial, min, max, step
+        jSpinner1.setModel(hourModel);
+
+        // Konfigurasi JSpinner untuk Menit (0-59)
+        SpinnerModel minuteModel = new SpinnerNumberModel(0, 0, 59, 1); // initial, min, max, step
+        jSpinner3.setModel(minuteModel);
+
+        // Konfigurasi JSpinner untuk Jumlah Hari (misal minimal 1 hari)
+        SpinnerModel durasiHariModel = new SpinnerNumberModel(1, 1, 365, 1); // initial, min, max, step
+        jSpinner4.setModel(durasiHariModel);
+        
         penggunaMap = new java.util.LinkedHashMap<>(); 
         loadPenggunaToComboBox();
         motorMap = new java.util.LinkedHashMap<>();
@@ -67,11 +78,12 @@ public class sewa extends javax.swing.JFrame {
                 "Merk Motor", 
                 "Model Motor",   
                 "Plat Nomor",   
-                "Tgl Peminjaman",
-                "Tgl Kembali",  
-                "Durasi Sewa (Jam)",
+                "Tanggl Peminjaman",
+                "Tanggal Kembali",  
+                "Durasi Sewa Hari",
                 "Status Sewa",
-                "Total Denda",  
+                "Total Bayar Sewa",
+                "Total Bayar Denda",  
                 "Total Keseluruhan"
             }
         )
@@ -123,7 +135,7 @@ public class sewa extends javax.swing.JFrame {
             ResultSet res = stt.executeQuery(SQL);
 
             while (res.next()) {
-                Object[] data = new Object[11];
+                Object[] data = new Object[12];
                 data[0] = res.getString(1);
                 data[1] = res.getString(2);
                 data[2] = res.getString(3);
@@ -242,10 +254,10 @@ public class sewa extends javax.swing.JFrame {
         jSeparator1 = new javax.swing.JSeparator();
         jSeparator2 = new javax.swing.JSeparator();
         jSeparator3 = new javax.swing.JSeparator();
-        btn_tambah1 = new javax.swing.JButton();
-        btn_tambah2 = new javax.swing.JButton();
-        btn_tambah3 = new javax.swing.JButton();
-        btn_tambah4 = new javax.swing.JButton();
+        btn_simpan = new javax.swing.JButton();
+        btn_ubah = new javax.swing.JButton();
+        btn_hapus = new javax.swing.JButton();
+        btn_batal = new javax.swing.JButton();
         jLabel8 = new javax.swing.JLabel();
         txt_cari = new javax.swing.JTextField();
         combo_kategori = new javax.swing.JComboBox();
@@ -333,31 +345,31 @@ public class sewa extends javax.swing.JFrame {
             }
         });
 
-        btn_tambah1.setText("Simpan");
-        btn_tambah1.addActionListener(new java.awt.event.ActionListener() {
+        btn_simpan.setText("Simpan");
+        btn_simpan.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btn_tambah1ActionPerformed(evt);
+                btn_simpanActionPerformed(evt);
             }
         });
 
-        btn_tambah2.setText("Ubah");
-        btn_tambah2.addActionListener(new java.awt.event.ActionListener() {
+        btn_ubah.setText("Ubah");
+        btn_ubah.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btn_tambah2ActionPerformed(evt);
+                btn_ubahActionPerformed(evt);
             }
         });
 
-        btn_tambah3.setText("Hapus");
-        btn_tambah3.addActionListener(new java.awt.event.ActionListener() {
+        btn_hapus.setText("Hapus");
+        btn_hapus.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btn_tambah3ActionPerformed(evt);
+                btn_hapusActionPerformed(evt);
             }
         });
 
-        btn_tambah4.setText("Batal");
-        btn_tambah4.addActionListener(new java.awt.event.ActionListener() {
+        btn_batal.setText("Batal");
+        btn_batal.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btn_tambah4ActionPerformed(evt);
+                btn_batalActionPerformed(evt);
             }
         });
 
@@ -438,43 +450,40 @@ public class sewa extends javax.swing.JFrame {
             .addComponent(jSeparator2)
             .addComponent(jSeparator3)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel3)
-                                    .addComponent(jLabel2))
-                                .addGap(36, 36, 36)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(combo_penyewa, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(combo_motor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(248, 248, 248)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(tanggal_diambil, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel4))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel5))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel11)
-                                    .addComponent(jSpinner3, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                        .addComponent(jLabel6)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(combo_status, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                        .addComponent(jLabel9)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jSpinner4, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel2))
+                        .addGap(36, 36, 36)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(combo_penyewa, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(combo_motor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(248, 248, 248)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(tanggal_diambil, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel4))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel5))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel11)
+                            .addComponent(jSpinner3, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLabel6)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(combo_status, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLabel9)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jSpinner4, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txt_cari, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -495,13 +504,13 @@ public class sewa extends javax.swing.JFrame {
                 .addGap(547, 547, 547)
                 .addComponent(btn_tambah, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btn_tambah1, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btn_simpan, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btn_tambah2, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btn_ubah, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btn_tambah3, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btn_hapus, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btn_tambah4, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btn_batal, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -558,10 +567,10 @@ public class sewa extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btn_tambah, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btn_tambah1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btn_tambah2, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btn_tambah3, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btn_tambah4, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btn_simpan, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btn_ubah, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btn_hapus, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btn_batal, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18))
         );
 
@@ -590,21 +599,134 @@ public class sewa extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_combo_statusActionPerformed
 
-    private void btn_tambah1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_tambah1ActionPerformed
+    private void btn_simpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_simpanActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_btn_tambah1ActionPerformed
+         // 1. Ambil data dari JDateChooser (tanggal)
+        Date tanggalPeminjamanDate = tanggal_diambil.getDate();
 
-    private void btn_tambah2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_tambah2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btn_tambah2ActionPerformed
+        // Pastikan tanggal tidak null
+        if (tanggalPeminjamanDate == null) {
+            JOptionPane.showMessageDialog(this, "Silakan pilih tanggal peminjaman.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-    private void btn_tambah3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_tambah3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btn_tambah3ActionPerformed
+        // 2. Ambil data dari JSpinner (jam dan menit)
+        int jam = (Integer) jSpinner1.getValue();
+        int menit = (Integer) jSpinner3.getValue();
+        int jumlahHari = (Integer) jSpinner4.getValue(); // Ambil jumlah hari
 
-    private void btn_tambah4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_tambah4ActionPerformed
+        // 3. Gabungkan tanggal, jam, dan menit menjadi satu objek Calendar/Date
+        Calendar calPeminjaman = Calendar.getInstance();
+        calPeminjaman.setTime(tanggalPeminjamanDate);
+        calPeminjaman.set(Calendar.HOUR_OF_DAY, jam); // Set jam (format 24 jam)
+        calPeminjaman.set(Calendar.MINUTE, menit);   // Set menit
+        calPeminjaman.set(Calendar.SECOND, 0);     // Set detik menjadi 0
+        calPeminjaman.set(Calendar.MILLISECOND, 0); // Set milidetik menjadi 0
+
+        // Konversi ke java.sql.Timestamp untuk disimpan ke database
+        java.sql.Timestamp tanggalPeminjamanTimestamp = new java.sql.Timestamp(calPeminjaman.getTimeInMillis());
+
+        // 4. Hitung tanggal kembali
+        Calendar calKembali = (Calendar) calPeminjaman.clone(); // Duplikasi calendar peminjaman
+        calKembali.add(Calendar.DAY_OF_YEAR, jumlahHari); // Tambahkan jumlah hari
+
+        java.sql.Timestamp tanggalKembaliTimestamp = new java.sql.Timestamp(calKembali.getTimeInMillis());
+
+        // 5. Ambil data lain yang diperlukan untuk insert (id_pelanggan, id_motor, status_sewa, dll.)
+        String selectedPelanggan = (String) combo_penyewa.getSelectedItem();
+        if (selectedPelanggan.equals("Pilih Pelanggan")) {
+            JOptionPane.showMessageDialog(this, "Silakan pilih pelanggan.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        int idPelanggan = penggunaMap.get(selectedPelanggan);
+
+        String selectedMotor = (String) combo_motor.getSelectedItem();
+        if (selectedMotor.equals("Pilih Motor")) {
+            JOptionPane.showMessageDialog(this, "Silakan pilih motor.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        int idMotor = motorMap.get(selectedMotor);
+
+        String statusSewa = (String) combo_status.getSelectedItem();
+        // Anda perlu mendapatkan nilai total_bayar_sewa, total_denda, total_keseluruhan
+        // Saya asumsikan ini akan dihitung atau diinput dari form.
+        // Untuk contoh ini, saya akan gunakan nilai default atau placeholder.
+        double totalBayarSewa = 0.0; // Contoh: Anda mungkin punya JTextField untuk ini
+        double totalDenda = 0.0;    // Contoh: Ini mungkin dihitung belakangan atau dari form denda
+        double totalKeseluruhan = 0.0; // Contoh: Ini mungkin dihitung dari harga sewa motor * jumlah hari
+
+        // Ambil harga sewa motor dari database (Anda bisa menambahkan method di kelas ini)
+        try {
+            // Ambil harga sewa motor berdasarkan id_motor
+            Class.forName(driver);
+            Connection kon = DriverManager.getConnection(database, user, pass);
+            Statement stt = kon.createStatement();
+            String sqlHargaMotor = "SELECT harga_sewa FROM motor WHERE id_motor = " + idMotor;
+            ResultSet rsHarga = stt.executeQuery(sqlHargaMotor);
+            if (rsHarga.next()) {
+                double hargaSewaPerHari = rsHarga.getDouble("harga_sewa");
+                totalBayarSewa = hargaSewaPerHari * jumlahHari;
+                totalKeseluruhan = totalBayarSewa + totalDenda; // Hitung ulang total_keseluruhan
+            }
+            rsHarga.close();
+            stt.close();
+            kon.close();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error mengambil harga sewa motor: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+
+        // 6. Buat query INSERT ke database
+        try {
+            Class.forName(driver);
+            Connection kon = DriverManager.getConnection(database, user, pass);
+            String SQL_INSERT = "INSERT INTO sewa (id_pelanggan, id_motor, tanggal_peminjaman, tanggal_kembali, durasi_sewa_hari, status_sewa, total_bayar_sewa, total_denda, total_keseluruhan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            java.sql.PreparedStatement pst = kon.prepareStatement(SQL_INSERT);
+
+            pst.setInt(1, idPelanggan);
+            pst.setInt(2, idMotor);
+            pst.setTimestamp(3, tanggalPeminjamanTimestamp);
+            pst.setTimestamp(4, tanggalKembaliTimestamp);
+            pst.setInt(5, jumlahHari);
+            pst.setString(6, statusSewa);
+            pst.setDouble(7, totalBayarSewa);
+            pst.setDouble(8, totalDenda);
+            pst.setDouble(9, totalKeseluruhan);
+
+            int rowsAffected = pst.executeUpdate();
+
+            if (rowsAffected > 0) {
+                JOptionPane.showMessageDialog(this, "Data sewa berhasil disimpan!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                // Refresh tabel
+                settableload();
+                // Optional: Bersihkan form setelah simpan
+            } else {
+                JOptionPane.showMessageDialog(this, "Gagal menyimpan data sewa.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+            pst.close();
+            kon.close();
+        } catch (SQLException ex) {
+            System.err.println("SQL Error: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Terjadi kesalahan database: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (ClassNotFoundException ex) {
+            System.err.println("Driver not found: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Driver database tidak ditemukan: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btn_simpanActionPerformed
+
+    private void btn_ubahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_ubahActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_btn_tambah4ActionPerformed
+    }//GEN-LAST:event_btn_ubahActionPerformed
+
+    private void btn_hapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_hapusActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btn_hapusActionPerformed
+
+    private void btn_batalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_batalActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btn_batalActionPerformed
 
     private void btn_cariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_cariActionPerformed
         // TODO add your handling code here:
@@ -671,7 +793,7 @@ public class sewa extends javax.swing.JFrame {
             ResultSet res = stt.executeQuery(SQL);
             while(res.next())
             {
-                Object[] data = new Object[11];
+                Object[] data = new Object[12];
                 data[0] = res.getString(1);
                 data[1] = res.getString(2);
                 data[2] = res.getString(3);
@@ -744,14 +866,14 @@ public class sewa extends javax.swing.JFrame {
     private java.util.Map<String, Integer> penggunaMap;
     private java.util.Map<String, Integer> motorMap;
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btn_batal;
     private javax.swing.JButton btn_cari;
+    private javax.swing.JButton btn_hapus;
+    private javax.swing.JButton btn_simpan;
     private javax.swing.JButton btn_sort;
     private javax.swing.JButton btn_tambah;
-    private javax.swing.JButton btn_tambah1;
-    private javax.swing.JButton btn_tambah2;
-    private javax.swing.JButton btn_tambah3;
-    private javax.swing.JButton btn_tambah4;
     private javax.swing.JButton btn_tampil_semua;
+    private javax.swing.JButton btn_ubah;
     private javax.swing.JComboBox combo_kategori;
     private javax.swing.JComboBox combo_motor;
     private javax.swing.JComboBox combo_penyewa;

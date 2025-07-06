@@ -56,8 +56,8 @@ public class denda extends javax.swing.JFrame {
                 "ID Sewa",
                 "Nama Penyewa", 
                 "Jenis Denda",
-                "Jumlah Denda Terlambat",
-                "Jenis Denda Kerusakan",
+                "Keterlambatan",
+                "Bayar Kerusakan",
                 "Jumlah Denda",
                 "Keterangan Denda"
             }
@@ -311,6 +311,11 @@ public class denda extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tabel_denda.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tabel_dendaMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tabel_denda);
 
         combo_penyewa.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
@@ -351,7 +356,7 @@ public class denda extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSeparator3, javax.swing.GroupLayout.DEFAULT_SIZE, 1016, Short.MAX_VALUE)
+            .addComponent(jSeparator3, javax.swing.GroupLayout.DEFAULT_SIZE, 1222, Short.MAX_VALUE)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(447, 447, 447)
                 .addComponent(jLabel1)
@@ -440,7 +445,7 @@ public class denda extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(combo_sort, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btn_sort, javax.swing.GroupLayout.DEFAULT_SIZE, 156, Short.MAX_VALUE)
+                        .addComponent(btn_sort, javax.swing.GroupLayout.DEFAULT_SIZE, 362, Short.MAX_VALUE)
                         .addGap(11, 11, 11))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -461,7 +466,7 @@ public class denda extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txt_total_telat, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txt_total_denda, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(28, 28, 28)
+                        .addGap(90, 90, 90)
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txt_keterangan, javax.swing.GroupLayout.PREFERRED_SIZE, 303, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -486,30 +491,34 @@ public class denda extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(txt_keterangan, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 2, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(55, 55, 55)
+                                .addGap(42, 42, 42)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(label_total_telat)
                                     .addComponent(txt_total_telat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(txt_total_denda, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(label_total_denda))
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(13, 13, 13)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(jLabel2)
-                                    .addComponent(combo_penyewa, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txt_total_denda, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(label_total_denda))
+                                    .addComponent(combo_penyewa, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(combo_jenis, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txt_keterangan, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(combo_jenis, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -717,10 +726,7 @@ public class denda extends javax.swing.JFrame {
             return;
         }
 
-        int confirm = JOptionPane.showConfirmDialog(null, "Apakah Anda yakin ingin menghapus data ini?", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.NO_OPTION) {
-            return; 
-        }
+        JOptionPane.showConfirmDialog(null, "Apakah Anda yakin ingin menghapus data ini?", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
 
         String idDendaToDelete = tableMode1.getValueAt(row, 0).toString(); 
 
@@ -762,7 +768,7 @@ public class denda extends javax.swing.JFrame {
         String keteranganDenda = txt_keterangan.getText();
         
         double jumlahDendaFinal = 0.0;
-        double totalTerlambat = 0.0;
+        int totalTerlambat = 0;
         double totalKerusakan = 0.0;
 
         if (selectedPenyewa == null || selectedPenyewa.equals("Pilih Penyewa") || 
@@ -778,7 +784,7 @@ public class denda extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "Jumlah denda terlambat harus diisi dengan angka bulat lebih dari 0.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            totalTerlambat = ((Integer) telatValue).doubleValue();
+            totalTerlambat = ((Integer) telatValue);
             jumlahDendaFinal = totalTerlambat; 
             totalKerusakan = 0.0; 
         } else if (jenisDenda.equals("Kerusakan")) {
@@ -794,7 +800,7 @@ public class denda extends javax.swing.JFrame {
                      return;
                 }
                 jumlahDendaFinal = totalKerusakan;
-                totalTerlambat = 0.0; 
+                totalTerlambat = 0; 
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "Jumlah denda kerusakan tidak valid (bukan angka).", "Error Input", JOptionPane.ERROR_MESSAGE);
                 txt_total_denda.requestFocus();
@@ -889,6 +895,14 @@ public class denda extends javax.swing.JFrame {
                 JOptionPane.INFORMATION_MESSAGE);
         }
     }//GEN-LAST:event_btn_simpanActionPerformed
+
+    private void tabel_dendaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabel_dendaMouseClicked
+        // TODO add your handling code here:
+        if(evt.getClickCount()== 1)
+        {
+            tampil_field();
+        }
+    }//GEN-LAST:event_tabel_dendaMouseClicked
 
     /**
      * @param args the command line arguments
