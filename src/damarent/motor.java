@@ -31,8 +31,7 @@ public class motor extends javax.swing.JFrame {
         user = dbsetting.SettingPanel("DBUsername");
         pass = dbsetting.SettingPanel("DBPassword");
         
-        combo_urutkan.addItem("Harga Termurah");
-        combo_urutkan.addItem("Harga Termahal");
+
 
         tabel_motor.setModel(tableMode1);
         
@@ -120,8 +119,14 @@ public class motor extends javax.swing.JFrame {
         {
             while (res.next()) 
             {
-            for (int i = 0; i < 6; i++) data[i] = res.getString(i + 1);
-            tableMode1.addRow(data);
+                data[0] = res.getString("id_motor");
+                data[1] = res.getString("merk");
+                data[2] = res.getString("model");
+                data[3] = res.getString("plat_nomor");
+                data[4] = res.getString("harga_sewa");
+                data[5] = res.getString("status");
+
+                tableMode1.addRow(data);
             }
         }   
         catch (Exception ex) 
@@ -239,7 +244,7 @@ public class motor extends javax.swing.JFrame {
             }
         });
 
-        combo_kategori.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Merk", "Model", "Plat Nomor", "Warna", "Status" }));
+        combo_kategori.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Merk", "Model", "Plat Nomor", "Status" }));
 
         btn_cari.setText("Cari");
         btn_cari.addActionListener(new java.awt.event.ActionListener() {
@@ -503,7 +508,7 @@ public class motor extends javax.swing.JFrame {
             try(Connection kon = DriverManager.getConnection(database, user, pass);
                 Statement stt = kon.createStatement())
             {
-                String SQL = String.format("INSERT INTO motor (merk, model, plat_nomor, harga_sewa, status) ) VALUES ('%s','%s','%s','%s','%s')",
+                String SQL = String.format("INSERT INTO motor (merk, model, plat_nomor, harga_sewa, status) VALUES ('%s','%s','%s','%s','%s')",
                                     txt_merk.getText(), 
                                     txt_model.getText(), 
                                     txt_plat.getText(), 
@@ -592,9 +597,9 @@ public class motor extends javax.swing.JFrame {
        
         }
         catch (Exception ex)
-            {
+        {
             JOptionPane.showMessageDialog(null, ex.getMessage(),"error", JOptionPane.ERROR_MESSAGE);
-            }
+        }
         
     }//GEN-LAST:event_btn_ubahActionPerformed
 
@@ -603,22 +608,26 @@ public class motor extends javax.swing.JFrame {
         tableMode1.setRowCount(0);
         String kata = txt_cari.getText();
         String kolom = combo_kategori.getSelectedItem().toString().replace(" ", "_").toLowerCase();
-        
-        try (Connection kon = DriverManager.getConnection(database,user,pass);
-            Statement stt = kon.createStatement();
-            ResultSet res = stt.executeQuery(
-                "SELECT * FROM motor WHERE "+ kolom +"LIKE '%"+ kata +"%'"))
+
+        try (Connection kon = DriverManager.getConnection(database, user, pass);
+            Statement stt = kon.createStatement()) 
         {
-            while (res.next())
+            String sql = "SELECT * FROM motor WHERE " + kolom + " LIKE '%" + kata + "%'";
+            ResultSet res = stt.executeQuery(sql);
+
+            while (res.next()) 
             {
-                for(int i = 0;i<6;i++) data[i] = res.getString(i+1);
+                for (int i = 0; i < 6; i++) 
+                {
+                    data[i] = res.getString(i + 1);
+                }
                 tableMode1.addRow(data);
             }
-        }
-        
-        catch (Exception ex)
+
+        } 
+        catch (Exception ex) 
         {
-            JOptionPane.showMessageDialog(null, ex.getMessage(),"error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btn_cariActionPerformed
 
