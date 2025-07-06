@@ -178,7 +178,17 @@ public class pelanggan extends javax.swing.JFrame {
         jSeparator1 = new javax.swing.JSeparator();
         btn_ubah = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+        });
+        addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                formKeyPressed(evt);
+            }
+        });
 
         btn_simpan.setText("Simpan");
         btn_simpan.addActionListener(new java.awt.event.ActionListener() {
@@ -245,7 +255,7 @@ public class pelanggan extends javax.swing.JFrame {
             }
         });
 
-        combo_kategori.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Nama", "No Telp", "Alamat", "NIK" }));
+        combo_kategori.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Nama", "ID Pelanggan", "No Telp", "Alamat", "NIK" }));
         combo_kategori.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 combo_kategoriActionPerformed(evt);
@@ -313,8 +323,18 @@ public class pelanggan extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tabel_pelanggan.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tabel_pelangganMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tabel_pelanggan);
 
+        txt_nama_pelanggan.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                txt_nama_pelangganMouseClicked(evt);
+            }
+        });
         txt_nama_pelanggan.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txt_nama_pelangganActionPerformed(evt);
@@ -462,35 +482,35 @@ public class pelanggan extends javax.swing.JFrame {
             try
             {
                 Class.forName(driver);
-                // Use RETURN_GENERATED_KEYS to get auto-incremented ID
                 Connection kon = DriverManager.getConnection(database, user, pass);
                 Statement stt = kon.createStatement();
-                String SQL = "INSERT INTO pelanggan (nama_pelanggan, no_telepon, alamat, no_ktp, email) "
+
+                String SQL = "INSERT INTO pelanggan (nama_pelanggan, no_telepon, alamat, no_ktp) "
                              + "VALUES ('" + txt_nama_pelanggan.getText() + "', "
-                             + "'" + txt_notelp.getText() + "', " // Corrected concatenation
+                             + "'" + txt_notelp.getText() + "', "
                              + "'" + txt_alamat.getText() + "', "
                              + "'" + txt_nik.getText() + "') ";
-                
-                // Execute update and get generated keys
+
                 stt.executeUpdate(SQL, Statement.RETURN_GENERATED_KEYS);
                 ResultSet rs = stt.getGeneratedKeys();
+
                 String generatedId = null;
                 if (rs.next()) {
-                    generatedId = rs.getString(1); // Get the auto-generated ID
+                    generatedId = rs.getString(1); 
                 }
-                rs.close(); // Close ResultSet
-                
+
                 JOptionPane.showMessageDialog(null, "Data pelanggan berhasil disimpan!");
 
-                settableload(); 
-                stt.close();
-                kon.close();
+                Object[] newRowData = new Object[5]; 
+                newRowData[0] = generatedId;
+                newRowData[1] = txt_nama_pelanggan.getText(); 
+                newRowData[2] = txt_notelp.getText(); 
+                newRowData[3] = txt_alamat.getText(); 
+                newRowData[4] = txt_nik.getText();
+
+                tableMode1.addRow(newRowData);
+
                 membersihkan_teks();
-                btn_simpan.setEnabled(false);
-                nonaktif_teks();
-                btn_simpan.setEnabled(false);
-                nonaktif_teks();
-                
             }
             catch (Exception ex)
             {
@@ -523,10 +543,70 @@ public class pelanggan extends javax.swing.JFrame {
 
     private void btn_cariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_cariActionPerformed
         // TODO add your handling code here:
+        // TODO add your handling code here:
+        String cari = txt_cari.getText().toUpperCase();
+        if(cari.isEmpty())
+        {
+            JOptionPane.showMessageDialog(null, "Data tidak boleh ksoong, silahkan ulangi..");
+            txt_cari.requestFocus();
+        }
+        
+        tableMode1.setRowCount(0);
+        String kategorisql;
+        String kategori = (String) combo_kategori.getSelectedItem();
+        try
+        {
+            Class.forName(driver);
+            Connection kon = DriverManager.getConnection(
+                    database,
+                    user,
+                    pass
+            );
+            Statement stt=kon.createStatement();
+            
+            if (kategori=="ID Pelanggan") {
+                kategorisql = "id_pelanggan";
+            }else if (kategori=="Nama") {
+                kategorisql = "nama_pelanggan";
+            }else if (kategori=="No Telp") {
+                kategorisql = "no_telepon";
+            }else if (kategori=="Alamat") {
+                kategorisql = "alamat";
+            }else{
+                kategorisql = "no_ktp";
+            }
+            
+            String SQL = "SELECT * FROM pelanggan WHERE " + kategorisql + " LIKE '%" + cari + "%'";;
+           
+            ResultSet res = stt.executeQuery(SQL);
+            while(res.next())
+            {
+                Object[] data = new Object[5];
+                data[0] = res.getString(1);
+                data[1] = res.getString(2);
+                data[2] = res.getString(3);
+                data[3] = res.getString(4);
+                data[4] = res.getString(5);
+                tableMode1.addRow(data);
+            } 
+            res.close();
+            stt.close();
+            kon.close();
+        }
+        catch (Exception ex)
+        {
+            System.err.println(ex.getMessage());
+            JOptionPane.showMessageDialog(null,
+                    ex.getMessage(),"error",
+                    JOptionPane.INFORMATION_MESSAGE);
+            System.exit(0);
+        }
     }//GEN-LAST:event_btn_cariActionPerformed
 
     private void btn_tampilActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_tampilActionPerformed
         // TODO add your handling code here:
+        tableMode1.setRowCount(0);
+        settableload();
     }//GEN-LAST:event_btn_tampilActionPerformed
 
     private void txt_nama_pelangganActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_nama_pelangganActionPerformed
@@ -535,6 +615,24 @@ public class pelanggan extends javax.swing.JFrame {
 
     private void btn_hapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_hapusActionPerformed
         // TODO add your handling code here:
+        try
+        {
+            Class.forName(driver);
+            Connection kon = DriverManager.getConnection(database,user,pass);
+            Statement stt = kon.createStatement();
+            String SQL = "DELETE FROM `pelanggan`"
+                        + "WHERE "
+                        + "`id_pelanggan`='"+tableMode1.getValueAt(row, 0).toString()+"'";
+            stt.executeUpdate(SQL);
+            tableMode1.removeRow(row);
+            stt.close();
+            kon.close();
+            membersihkan_teks();
+        }
+        catch (Exception ex)
+        {
+            System.err.println(ex.getMessage());
+        }
     }//GEN-LAST:event_btn_hapusActionPerformed
 
     private void btn_batalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_batalActionPerformed
@@ -543,11 +641,82 @@ public class pelanggan extends javax.swing.JFrame {
 
     private void btn_tambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_tambahActionPerformed
         // TODO add your handling code here:
+         // TODO add your handling code here:
+        membersihkan_teks();
+        txt_nama_pelanggan.requestFocus();
+        btn_simpan.setEnabled(true);
+        btn_ubah.setEnabled(false);
+        btn_hapus.setEnabled(false);
+        aktif_teks();
     }//GEN-LAST:event_btn_tambahActionPerformed
 
     private void btn_ubahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_ubahActionPerformed
         // TODO add your handling code here:
+        String nama_pelanggan=txt_nama_pelanggan.getText();
+        String no_telepon=txt_notelp.getText();
+        String alamat=txt_alamat.getText();
+        String no_ktp=txt_nik.getText();  
+
+        if(nama_pelanggan.isEmpty())
+        {
+            JOptionPane.showMessageDialog(null, "Data tidak boleh ksoong, silahkan ulangi..");
+            txt_nama_pelanggan.requestFocus();
+        }
+        else
+        {
+            try
+            {
+                Class.forName(driver);
+                Connection kon = DriverManager.getConnection(database,user,pass);
+                Statement stt = kon.createStatement();
+                String SQL = "UPDATE `pelanggan`"
+                            + "SET `nama_pelanggan`='"+nama_pelanggan+"',"
+                            + "`no_telepon`='"+no_telepon+"',"
+                            + "`alamat`='"+alamat+"',"
+                            + "`no_ktp`='"+no_ktp+"'"
+                        + "WHERE "
+                        + "`id_pelanggan`='"+tableMode1.getValueAt(row, 0).toString() +"';";
+                stt.executeUpdate(SQL);
+                tableMode1.setValueAt(nama_pelanggan, row, 1);
+                tableMode1.setValueAt(no_telepon, row, 2);
+                tableMode1.setValueAt(alamat, row, 3);
+                tableMode1.setValueAt(no_ktp, row, 4);
+                
+                stt.close();
+                kon.close();
+                membersihkan_teks();
+                btn_simpan.setEnabled(false);
+                nonaktif_teks();
+            }
+            catch (Exception ex)
+            {
+                System.err.println(ex.getMessage());
+            }
+        }
     }//GEN-LAST:event_btn_ubahActionPerformed
+
+    private void tabel_pelangganMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabel_pelangganMouseClicked
+        // TODO add your handling code here:
+        if(evt.getClickCount() == 1)
+        {
+            tampil_field();
+        }
+    }//GEN-LAST:event_tabel_pelangganMouseClicked
+
+    private void formKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyPressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_formKeyPressed
+
+    private void txt_nama_pelangganMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txt_nama_pelangganMouseClicked
+        // TODO add your handling code here:
+        txt_nama_pelanggan.requestFocus();
+    }//GEN-LAST:event_txt_nama_pelangganMouseClicked
+
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        // TODO add your handling code here:
+        menu_utama utama = new menu_utama();
+        utama.setVisible(true);
+    }//GEN-LAST:event_formWindowClosed
 
     /**
      * @param args the command line arguments
