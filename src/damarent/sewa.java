@@ -47,15 +47,15 @@ public class sewa extends javax.swing.JFrame {
         pass = dbsetting.SettingPanel("DBPassword");
         
         SpinnerModel hourModel = new SpinnerNumberModel(0, 0, 23, 1); // initial, min, max, step
-        jSpinner1.setModel(hourModel);
+        jam_diambil.setModel(hourModel);
 
         // Konfigurasi JSpinner untuk Menit (0-59)
         SpinnerModel minuteModel = new SpinnerNumberModel(0, 0, 59, 1); // initial, min, max, step
-        jSpinner3.setModel(minuteModel);
+        menit_diambil.setModel(minuteModel);
 
         // Konfigurasi JSpinner untuk Jumlah Hari (misal minimal 1 hari)
         SpinnerModel durasiHariModel = new SpinnerNumberModel(1, 1, 365, 1); // initial, min, max, step
-        jSpinner4.setModel(durasiHariModel);
+        jumlah_hari.setModel(durasiHariModel);
         
         penggunaMap = new java.util.LinkedHashMap<>(); 
         loadPenggunaToComboBox();
@@ -78,7 +78,7 @@ public class sewa extends javax.swing.JFrame {
                 "Merk Motor", 
                 "Model Motor",   
                 "Plat Nomor",   
-                "Tanggl Peminjaman",
+                "Tanggal Peminjaman",
                 "Tanggal Target Kembali",  
                 "Durasi Sewa Hari",
                 "Harga Sewa Awal",
@@ -164,9 +164,9 @@ public class sewa extends javax.swing.JFrame {
     // Metode untuk mengosongkan semua field input
     private void membersihkan_teks() {
         tanggal_diambil.setDate(new Date()); // Atur ke tanggal saat ini
-        jSpinner1.setValue(0);
-        jSpinner3.setValue(0);
-        jSpinner4.setValue(1); // Set durasi kembali ke 1 hari
+        jam_diambil.setValue(0);
+        menit_diambil.setValue(0);
+        jumlah_hari.setValue(1); // Set durasi kembali ke 1 hari
         combo_penyewa.setSelectedIndex(0); // Pilih item default "Pilih Pelanggan"
         combo_motor.setSelectedIndex(0);   // Pilih item default "Pilih Motor"
         combo_status.setSelectedItem("Disewa"); // Set status default
@@ -176,9 +176,9 @@ public class sewa extends javax.swing.JFrame {
     // Metode untuk mengaktifkan field input
     private void aktifkan_teks() {
         tanggal_diambil.setEnabled(true);
-        jSpinner1.setEnabled(true);
-        jSpinner3.setEnabled(true);
-        jSpinner4.setEnabled(true);
+        jam_diambil.setEnabled(true);
+        menit_diambil.setEnabled(true);
+        jumlah_hari.setEnabled(true);
         combo_penyewa.setEnabled(true);
         combo_motor.setEnabled(true);
         combo_status.setEnabled(true);
@@ -187,9 +187,9 @@ public class sewa extends javax.swing.JFrame {
     // Metode untuk menonaktifkan field input
     private void nonaktif_teks() {
         tanggal_diambil.setEnabled(false);
-        jSpinner1.setEnabled(false);
-        jSpinner3.setEnabled(false);
-        jSpinner4.setEnabled(false);
+        jam_diambil.setEnabled(false);
+        menit_diambil.setEnabled(false);
+        jumlah_hari.setEnabled(false);
         combo_penyewa.setEnabled(false);
         combo_motor.setEnabled(false);
         combo_status.setEnabled(false);
@@ -300,16 +300,16 @@ public class sewa extends javax.swing.JFrame {
             // Mengisi JSpinner jam dan menit
             Calendar cal = Calendar.getInstance();
             cal.setTime(tanggalPeminjaman);
-            jSpinner1.setValue(cal.get(Calendar.HOUR_OF_DAY));
-            jSpinner3.setValue(cal.get(Calendar.MINUTE));
+            jam_diambil.setValue(cal.get(Calendar.HOUR_OF_DAY));
+            menit_diambil.setValue(cal.get(Calendar.MINUTE));
         } else {
             tanggal_diambil.setDate(null);
-            jSpinner1.setValue(0);
-            jSpinner3.setValue(0);
+            jam_diambil.setValue(0);
+            menit_diambil.setValue(0);
         }
 
         // Mengisi JSpinner Durasi Hari
-        jSpinner4.setValue(durasiSewaHari);
+        jumlah_hari.setValue(durasiSewaHari);
 
         // Mengisi ComboBox Pelanggan
         boolean pelangganFound = false;
@@ -404,13 +404,13 @@ public class sewa extends javax.swing.JFrame {
         tanggal_diambil = new com.toedter.calendar.JDateChooser();
         combo_penyewa = new javax.swing.JComboBox();
         combo_motor = new javax.swing.JComboBox();
-        jSpinner1 = new javax.swing.JSpinner();
+        jam_diambil = new javax.swing.JSpinner();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
-        jSpinner3 = new javax.swing.JSpinner();
+        menit_diambil = new javax.swing.JSpinner();
         jLabel9 = new javax.swing.JLabel();
-        jSpinner4 = new javax.swing.JSpinner();
+        jumlah_hari = new javax.swing.JSpinner();
         combo_sort = new javax.swing.JComboBox();
         jLabel12 = new javax.swing.JLabel();
         btn_sort = new javax.swing.JButton();
@@ -610,12 +610,12 @@ public class sewa extends javax.swing.JFrame {
                             .addComponent(jLabel4))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jam_diambil, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel5))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel11)
-                            .addComponent(jSpinner3, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(menit_diambil, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -625,7 +625,7 @@ public class sewa extends javax.swing.JFrame {
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(jLabel9)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jSpinner4, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addComponent(jumlah_hari, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -673,8 +673,8 @@ public class sewa extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jSpinner3)
-                                .addComponent(jSpinner1))
+                                .addComponent(menit_diambil)
+                                .addComponent(jam_diambil))
                             .addComponent(tanggal_diambil, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -687,7 +687,7 @@ public class sewa extends javax.swing.JFrame {
                             .addComponent(combo_motor)
                             .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jSpinner4, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jumlah_hari, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(jLabel9)))))
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -721,9 +721,9 @@ public class sewa extends javax.swing.JFrame {
 
         layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {combo_motor, combo_penyewa, combo_status, jLabel2, jLabel3, jLabel6});
 
-        layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jSpinner1, jSpinner3, tanggal_diambil});
+        layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jam_diambil, menit_diambil, tanggal_diambil});
 
-        layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel9, jSpinner4});
+        layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel9, jumlah_hari});
 
         layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel11, jLabel4, jLabel5});
 
@@ -758,9 +758,9 @@ public class sewa extends javax.swing.JFrame {
             return;
         }
 
-        int jam = (Integer) jSpinner1.getValue();
-        int menit = (Integer) jSpinner3.getValue();
-        int jumlahHari = (Integer) jSpinner4.getValue();
+        int jam = (Integer) jam_diambil.getValue();
+        int menit = (Integer) menit_diambil.getValue();
+        int jumlahHari = (Integer) jumlah_hari.getValue();
 
         Calendar calPeminjaman = Calendar.getInstance();
         calPeminjaman.setTime(tanggalPeminjamanDate);
@@ -834,7 +834,7 @@ public class sewa extends javax.swing.JFrame {
             pst.setTimestamp(4, tanggalTargetKembaliTimestamp);
             pst.setInt(5, jumlahHari);
             pst.setDouble(6, biayaSewaAwal);
-            pst.setString(7, statusSewaDB);
+            pst.setString(7, statusSewaCombo);
 
             int rowsAffected = pst.executeUpdate();
 
@@ -875,9 +875,9 @@ public class sewa extends javax.swing.JFrame {
             return;
         }
 
-        int jam = (Integer) jSpinner1.getValue();
-        int menit = (Integer) jSpinner3.getValue();
-        int jumlahHari = (Integer) jSpinner4.getValue();
+        int jam = (Integer) jam_diambil.getValue();
+        int menit = (Integer) menit_diambil.getValue();
+        int jumlahHari = (Integer) jumlah_hari.getValue();
 
         Calendar calPeminjaman = Calendar.getInstance();
         calPeminjaman.setTime(tanggalPeminjamanDate);
@@ -906,14 +906,6 @@ public class sewa extends javax.swing.JFrame {
         int idMotor = motorMap.get(selectedMotorDisplay);
 
         String statusSewaCombo = (String) combo_status.getSelectedItem();
-        String statusSewaDB;
-        if (statusSewaCombo.equalsIgnoreCase("Disewa")) {
-            statusSewaDB = "aktif";
-        } else if (statusSewaCombo.equalsIgnoreCase("Selesai")) {
-            statusSewaDB = "selesai";
-        } else {
-            statusSewaDB = statusSewaCombo; // Fallback jika ada status lain
-        }
 
         // Ambil harga sewa per hari dari database untuk menghitung ulang biaya_sewa_awal
         double hargaSewaPerHari = 0.0;
@@ -924,36 +916,30 @@ public class sewa extends javax.swing.JFrame {
             konTemp = DriverManager.getConnection(database, user, pass);
             sttTemp = konTemp.createStatement();
             // === PERBAIKAN NAMA KOLOM HARGA SEWA ===
-            String sqlHargaMotor = "SELECT harga_sewa_per_hari FROM motor WHERE id_motor = " + idMotor;
+            String sqlHargaMotor = "SELECT harga_sewa FROM motor WHERE id_motor = " + idMotor;
             ResultSet rsHarga = sttTemp.executeQuery(sqlHargaMotor);
             if (rsHarga.next()) {
-                hargaSewaPerHari = rsHarga.getDouble("harga_sewa_per_hari");
+                hargaSewaPerHari = rsHarga.getDouble("harga_sewa");
             }
             rsHarga.close();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error mengambil harga sewa motor untuk update: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        } finally {
-            try { if (sttTemp != null) sttTemp.close(); } catch (SQLException e) { /* ignore */ }
-            try { if (konTemp != null) konTemp.close(); } catch (SQLException e) { /* ignore */ }
+        }catch (Exception ex){
+            System.err.println(ex.getMessage());
         }
         double biayaSewaAwal = hargaSewaPerHari * jumlahHari;
 
-        // 3. Buat query UPDATE
-        Connection kon = null;
         java.sql.PreparedStatement pst = null;
         try {
             Class.forName(driver);
-            kon = DriverManager.getConnection(database, user, pass);
+            Connection kon = DriverManager.getConnection(database, user, pass);
 
             // === PERBAIKAN SQL UPDATE QUERY ===
             String SQL_UPDATE = "UPDATE sewa SET " +
                                 "`id_pelanggan`=?, " +
                                 "`id_motor`=?, " +
                                 "`tanggal_peminjaman`=?, " +
-                                "`tanggal_target_pengembalian`=?, " + // Nama kolom yang benar
+                                "`tanggal_kembali`=?, " + // Nama kolom yang benar
                                 "`durasi_sewa_hari`=?, " +
-                                "`biaya_sewa_awal`=?, " +              // Kolom baru
+                                "`harga_sewa_awal`=?, " +              // Kolom baru
                                 "`status_sewa`=? " +
                                 "WHERE `id_sewa`=?";
 
@@ -964,7 +950,7 @@ public class sewa extends javax.swing.JFrame {
             pst.setTimestamp(4, tanggalTargetKembaliTimestamp);
             pst.setInt(5, jumlahHari);
             pst.setDouble(6, biayaSewaAwal);
-            pst.setString(7, statusSewaDB);
+            pst.setString(7, statusSewaCombo);
             pst.setString(8, idSewaToUpdate);
 
             int rowsAffected = pst.executeUpdate();
@@ -979,19 +965,8 @@ public class sewa extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Gagal mengubah data sewa. ID Sewa tidak ditemukan atau tidak ada perubahan.", "Error", JOptionPane.ERROR_MESSAGE);
             }
 
-        } catch (SQLException ex) {
-            System.err.println("SQL Error di btn_ubahActionPerformed(): " + ex.getMessage());
-            JOptionPane.showMessageDialog(this, "Terjadi kesalahan database: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        } catch (ClassNotFoundException ex) {
-            System.err.println("Driver not found di btn_ubahActionPerformed(): " + ex.getMessage());
-            JOptionPane.showMessageDialog(this, "Driver database tidak ditemukan: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            try {
-                if (pst != null) pst.close();
-                if (kon != null) kon.close();
-            } catch (SQLException e) {
-                System.err.println("Error closing resources after update: " + e.getMessage());
-            }
+        } catch (Exception ex){
+            System.err.println(ex.getMessage());
         }
     }//GEN-LAST:event_btn_ubahActionPerformed
 
@@ -1007,15 +982,13 @@ public class sewa extends javax.swing.JFrame {
         int confirm = JOptionPane.showConfirmDialog(null, "Apakah Anda yakin ingin menghapus data sewa ini? \n(Semua denda terkait juga akan dihapus).", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            Connection kon = null;
-            Statement stt = null;
             try {
                 Class.forName(driver);
-                kon = DriverManager.getConnection(database, user, pass);
+                Connection kon = DriverManager.getConnection(database, user, pass);
                 // Menggunakan transaksi untuk memastikan kedua operasi (hapus denda & hapus sewa) berhasil atau gagal bersamaan
                 kon.setAutoCommit(false); // Nonaktifkan auto-commit
 
-                stt = kon.createStatement();
+                Statement stt = kon.createStatement();
 
                 // 1. Hapus denda terkait terlebih dahulu
                 String SQL_DELETE_DENDA = "DELETE FROM denda WHERE id_sewa = '" + idSewaToDelete + "'";
@@ -1038,21 +1011,8 @@ public class sewa extends javax.swing.JFrame {
                     JOptionPane.showMessageDialog(null, "Gagal menghapus data sewa. ID Sewa tidak ditemukan.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
 
-            } catch (Exception ex) {
-                try {
-                    if (kon != null) kon.rollback(); // Rollback jika terjadi exception
-                } catch (SQLException e) {
-                    System.err.println("Error saat rollback: " + e.getMessage());
-                }
-                System.err.println("Error di btn_hapusActionPerformed(): " + ex.getMessage());
-                JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat menghapus data: " + ex.getMessage(), "Error Hapus", JOptionPane.ERROR_MESSAGE);
-            } finally {
-                try {
-                    if (stt != null) stt.close();
-                    if (kon != null) kon.close();
-                } catch (SQLException e) {
-                    System.err.println("Error closing resources after delete: " + e.getMessage());
-                }
+            } catch (Exception ex){
+                System.err.println(ex.getMessage());
             }
         }
     }//GEN-LAST:event_btn_hapusActionPerformed
@@ -1230,9 +1190,9 @@ public class sewa extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
-    private javax.swing.JSpinner jSpinner1;
-    private javax.swing.JSpinner jSpinner3;
-    private javax.swing.JSpinner jSpinner4;
+    private javax.swing.JSpinner jam_diambil;
+    private javax.swing.JSpinner jumlah_hari;
+    private javax.swing.JSpinner menit_diambil;
     private javax.swing.JTable tabel_sewa;
     private com.toedter.calendar.JDateChooser tanggal_diambil;
     private javax.swing.JTextField txt_cari;

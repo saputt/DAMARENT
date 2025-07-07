@@ -631,7 +631,7 @@ public class denda extends javax.swing.JFrame {
         double totalTerlambat = 0.0;
         double totalKerusakan = 0.0;
 
-        if (jenisDenda != null && jenisDenda.equals("Terlambat")) {
+        if (jenisDenda != null && jenisDenda == "Terlambat") {
             Object telatValue = txt_total_telat.getValue();
             if (telatValue == null || (Integer)telatValue <= 0) {
                 JOptionPane.showMessageDialog(null, "Jumlah denda terlambat harus diisi dengan angka lebih dari 0.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
@@ -640,14 +640,14 @@ public class denda extends javax.swing.JFrame {
             totalTerlambat = ((Integer) telatValue).doubleValue();
             jumlahDendaFinal = totalTerlambat;
             totalKerusakan = 0.0;
-        } else if (jenisDenda != null && jenisDenda.equals("Kerusakan")) {
-            String jumlahKerusakanStr = txt_total_denda.getText(); // This is a JTextField
-            if (jumlahKerusakanStr.isEmpty()) {
+        } else if (jenisDenda != null && jenisDenda == "Kerusakan") {
+            String jumlahKerusakan = txt_total_denda.getText(); 
+            if (jumlahKerusakan.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Jumlah denda kerusakan tidak boleh kosong.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             try {
-                totalKerusakan = Double.parseDouble(jumlahKerusakanStr);
+                totalKerusakan = Double.parseDouble(jumlahKerusakan);
                 if (totalKerusakan <= 0) {
                      JOptionPane.showMessageDialog(null, "Jumlah denda kerusakan harus lebih dari 0.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
                      return;
@@ -670,13 +670,10 @@ public class denda extends javax.swing.JFrame {
             return;
         }
 
-        Connection kon = null;
-        Statement stt = null;
-
         try {
             Class.forName(driver);
-            kon = DriverManager.getConnection(database, user, pass);
-            stt = kon.createStatement();
+            Connection kon = DriverManager.getConnection(database, user, pass);
+            Statement stt = kon.createStatement();
 
             String SQL = "UPDATE denda SET "
                        + "id_sewa = " + idSewa + ", " 
