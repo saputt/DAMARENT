@@ -481,7 +481,7 @@ public class sewa extends javax.swing.JFrame {
             }
         });
 
-        combo_status.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Disewa", "Selesai" }));
+        combo_status.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "aktif", "Selesai" }));
         combo_status.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 combo_statusActionPerformed(evt);
@@ -751,7 +751,7 @@ public class sewa extends javax.swing.JFrame {
     }//GEN-LAST:event_combo_statusActionPerformed
 
     private void btn_simpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_simpanActionPerformed
-         Date tanggalPeminjamanDate = tanggal_diambil.getDate();
+        Date tanggalPeminjamanDate = tanggal_diambil.getDate();
 
         if (tanggalPeminjamanDate == null) {
             JOptionPane.showMessageDialog(this, "Silakan pilih tanggal peminjaman.", "Peringatan", JOptionPane.WARNING_MESSAGE);
