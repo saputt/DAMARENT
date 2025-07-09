@@ -19,8 +19,8 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
-import java.util.HashMap; // Pastikan import ini ada
-import java.util.Map;     // Pastikan import ini ada
+import java.util.HashMap; 
+import java.util.Map;    
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.TimeUnit;
@@ -47,19 +47,21 @@ public class selesai extends javax.swing.JFrame {
         
         tanggal_dikembalikan.setDate(new Date());
         
-        sewaAktifMap = new HashMap<>(); // Menggunakan HashMap sebagai implementasi konkret
+        sewaAktifMap = new HashMap<>(); 
         sewaBiayaAwalMap = new HashMap<>();
         sewaTargetKembaliMap = new HashMap<>();
-        
-        SpinnerModel hourModel = new SpinnerNumberModel(0, 0, 23, 1); // initial, min, max, step
+        sewaPeminjamanMap = new HashMap<>();
+                
+        SpinnerModel hourModel = new SpinnerNumberModel(0, 0, 23, 1);
         jam_dikembalikan.setModel(hourModel);
 
-        // Konfigurasi JSpinner untuk Menit (0-59)
-        SpinnerModel minuteModel = new SpinnerNumberModel(0, 0, 59, 1); // initial, min, max, step
+        SpinnerModel minuteModel = new SpinnerNumberModel(0, 0, 59, 1); 
         menit_dikembalikan.setModel(minuteModel);
         
-        txt_tanggal_kembali_seharusnya.setEnabled(false);
-        txt_jumlah_harus_dibayarkan.setEnabled(false);
+        txt_tanggal_kembali_seharusnya.setEditable(false);
+        txt_tanggal_peminjaman.setEditable(false);
+        txt_jumlah_harus_dibayarkan.setEditable(false);
+        txt_jumlah_denda.setEditable(false);
         
         loadPenyewaToComboBox();
         table_selesai.setModel(tableMode1); 
@@ -74,19 +76,19 @@ public class selesai extends javax.swing.JFrame {
             new Object[][] {},
             new String[]
             {
-                "ID Selesai",             // Kolom dari tabel selesai
-                "ID Sewa",                // Kolom dari tabel selesai
-                "Nama Pelanggan",         // Join dari tabel pelanggan
-                "Merk Motor",             // Join dari tabel motor
-                "Plat Nomor",             // Join dari tabel motor
-                "Tgl Peminjaman",         // Join dari tabel sewa
-                "Tgl Target Kembali",     // Join dari tabel sewa
-                "Tgl Kembali Aktual",     // Kolom dari tabel selesai
-                "Kondisi Motor",          // Kolom dari tabel selesai
-                "Total Denda",            // Kolom dari tabel selesai
-                "Total Biaya Akhir",      // Kolom dari tabel selesai
-                "Jml Dibayar",            // Kolom dari tabel selesai
-                "Status Bayar"            // Kolom dari tabel selesai
+                "ID Selesai",             
+                "ID Sewa",               
+                "Nama Pelanggan",        
+                "Merk Motor",             
+                "Plat Nomor",          
+                "Tgl Peminjaman",        
+                "Tgl Target Kembali",     
+                "Tgl Kembali Aktual",     
+                "Kondisi Motor",         
+                "Total Denda",            
+                "Total Biaya Akhir",      
+                "Jml Dibayar",           
+                "Status Bayar"            
             }
         )
         
@@ -104,8 +106,7 @@ public class selesai extends javax.swing.JFrame {
     
     private void settableload()
     {
-        tableMode1.setRowCount(0); // Pastikan tabel dikosongkan terlebih dahulu
-
+        tableMode1.setRowCount(0); 
         Connection kon = null;
         Statement stt = null;
         ResultSet res = null;
@@ -115,39 +116,36 @@ public class selesai extends javax.swing.JFrame {
             kon = DriverManager.getConnection(database, user, pass);
             stt = kon.createStatement();
 
-            // === PERBAIKAN SQL QUERY UNTUK MEMUAT DATA DARI TABEL SELESAI ===
-            // Pastikan alias tabel digunakan untuk menghindari ambiguitas kolom
             String SQL = "SELECT " +
-                         "    sl.id_selesai, " +                  // 0
-                         "    sl.id_sewa, " +                     // 1
-                         "    p.nama_pelanggan, " +               // 2
-                         "    m.merk, " +                         // 3
-                         "    m.plat_nomor, " +                   // 4
-                         "    s.tanggal_peminjaman, " +           // 5
-                         "    s.tanggal_kembali, " +  // 6
-                         "    sl.tanggal_kembali_aktual, " + // 7
-                         "    sl.kondisi_motor_kembali, " +       // 8
-                         "    sl.total_denda, " + // 9
-                         "    sl.total_biaya, " +           // 10
-                         "    sl.jumlah_sudah_dibayar, " +   // 11
-                         "    sl.status_pembayaran " +            // 12
+                         "    sl.id_selesai, " +                 
+                         "    sl.id_sewa, " +                     
+                         "    p.nama_pelanggan, " +               
+                         "    m.merk, " +                       
+                         "    m.plat_nomor, " +                  
+                         "    s.tanggal_peminjaman, " +          
+                         "    s.tanggal_kembali, " +  
+                         "    sl.tanggal_kembali_aktual, " + 
+                         "    sl.kondisi_motor_kembali, " +       
+                         "    sl.total_denda, " + 
+                         "    sl.total_biaya, " +          
+                         "    sl.jumlah_sudah_dibayar, " +   
+                         "    sl.status_pembayaran " +            
                          "FROM " +
-                         "    selesai sl " +                      // Alias 'sl' untuk tabel selesai
+                         "    selesai sl " +                     
                          "JOIN " +
-                         "    sewa s ON sl.id_sewa = s.id_sewa " + // Alias 's' untuk tabel sewa
+                         "    sewa s ON sl.id_sewa = s.id_sewa " +
                          "JOIN " +
-                         "    pelanggan p ON s.id_pelanggan = p.id_pelanggan " + // Alias 'p'
+                         "    pelanggan p ON s.id_pelanggan = p.id_pelanggan " + 
                          "JOIN " +
-                         "    motor m ON s.id_motor = m.id_motor " + // Alias 'm'
+                         "    motor m ON s.id_motor = m.id_motor " + 
                          "ORDER BY " +
-                         "    sl.tanggal_kembali_aktual DESC"; // Urutkan berdasarkan tanggal selesai
+                         "    sl.tanggal_kembali_aktual DESC"; 
 
             res = stt.executeQuery(SQL);
 
             while (res.next()) {
-                Object[] data = new Object[13]; // === UKURAN ARRAY HARUS 13 KOLOM ===
+                Object[] data = new Object[13]; 
 
-                // Mengambil data menggunakan nama kolom (lebih aman & mudah dibaca)
                 data[0] = res.getString("id_selesai");
                 data[1] = res.getString("id_sewa");
                 data[2] = res.getString("nama_pelanggan");
@@ -201,37 +199,30 @@ public class selesai extends javax.swing.JFrame {
         menit_dikembalikan.setValue(Calendar.getInstance().get(Calendar.MINUTE));
         combo_kondisi.setSelectedIndex(0);
         txt_jumlah_dibayarkan.setText("");
-        txt_jumlahdenda1.setText("0.0"); // Reset total denda yang ditampilkan
-        txt_tanggal_kembali_seharusnya.setText(""); // Reset field tanggal seharusnya
-        txt_jumlah_harus_dibayarkan.setText("0.0"); // Reset field jumlah harus dibayarkan
+        txt_cari.setText(""); 
+        txt_tanggal_kembali_seharusnya.setText(""); 
+        txt_jumlah_harus_dibayarkan.setText("0.0"); 
         combo_penyewa1.setSelectedIndex(0);
     }
     
-    int row = -1; // Deklarasi row di sini
+    int row = -1; 
      public void tampil_field() {
         row = table_selesai.getSelectedRow();
-        if (row >= 0) { // Pastikan indeks baris valid
-            // Ambil ID Sewa dari tabel
-            // Indeks kolom sesuai dengan getDefaultTabelModel()
-            String idSewaFromTable = tableMode1.getValueAt(row, 1).toString(); // Kolom ID Sewa (indeks 1)
-            
-            // Cari item yang cocok di combo_penyewa
+        if (row >= 0) { 
+            String idSewaFromTable = tableMode1.getValueAt(row, 1).toString(); 
+
             for (int i = 0; i < combo_penyewa.getItemCount(); i++) {
                 String itemText = (String) combo_penyewa.getItemAt(i);
-                if (itemText.startsWith(idSewaFromTable + " - ")) { // Pastikan format match: "ID Sewa - Nama Pelanggan (Plat Nomor)"
+                if (itemText.startsWith(idSewaFromTable + " - ")) {
                     combo_penyewa.setSelectedIndex(i);
                     break;
                 }
             }
 
-            // Ambil data lainnya dari baris tabel dan tampilkan di field input
-            // SESUAIKAN INDEKS KOLOM DENGAN getDefaultTabelModel() ANDA!
-            txt_jumlah_dibayarkan.setText(tableMode1.getValueAt(row, 11).toString()); // Jml Dibayar (indeks 11)
-            txt_jumlahdenda1.setText(tableMode1.getValueAt(row, 9).toString()); // Total Denda (indeks 9)
-            txt_jumlah_harus_dibayarkan.setText(tableMode1.getValueAt(row, 10).toString()); // Total Biaya Akhir (indeks 10)
+            txt_jumlah_dibayarkan.setText(tableMode1.getValueAt(row, 11).toString()); 
+            txt_jumlah_harus_dibayarkan.setText(tableMode1.getValueAt(row, 10).toString()); 
 
-            // Tanggal Kembali Aktual
-            Timestamp tglKembaliAktualTs = (Timestamp) tableMode1.getValueAt(row, 7); // Tgl Kembali Aktual (indeks 7)
+            Timestamp tglKembaliAktualTs = (Timestamp) tableMode1.getValueAt(row, 7); 
             if (tglKembaliAktualTs != null) {
                 tanggal_dikembalikan.setDate(new Date(tglKembaliAktualTs.getTime()));
                 Calendar cal = Calendar.getInstance();
@@ -244,43 +235,26 @@ public class selesai extends javax.swing.JFrame {
                 menit_dikembalikan.setValue(0);
             }
 
-            // Kondisi Motor
-            String kondisi = tableMode1.getValueAt(row, 8).toString(); // Kondisi Motor (indeks 8)
+            String kondisi = tableMode1.getValueAt(row, 8).toString();
             combo_kondisi.setSelectedItem(kondisi);
 
-            // Tanggal Kembali Rencana (Tgl Target Kembali)
-            Timestamp tglKembaliRencanaTs = (Timestamp) tableMode1.getValueAt(row, 6); // Tgl Target Kembali (indeks 6)
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy HH:mm"); // Format yang lebih lengkap
+            Timestamp tglKembaliRencanaTs = (Timestamp) tableMode1.getValueAt(row, 6); 
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy HH:mm"); 
             if (tglKembaliRencanaTs != null) {
                 txt_tanggal_kembali_seharusnya.setText(dateFormat.format(tglKembaliRencanaTs));
             } else {
                 txt_tanggal_kembali_seharusnya.setText("N/A");
             }
-            
-            // Setelah mengisi field, panggil updateCalculatedFields() untuk memastikan
-            // total denda dan total biaya akhir dihitung ulang berdasarkan data yang ditampilkan.
-            // Ini penting karena denda progresif dan denda kerusakan dihitung di sini
-            // updateCalculatedFields(); // Mungkin tidak perlu dipanggil di sini jika data sudah lengkap dari tabel
-
-            // Aktifkan tombol Ubah dan Hapus
             aktifkan_teks();
-            btn_ubah.setEnabled(true);
-            btn_hapus.setEnabled(true);
-            btn_simpan.setEnabled(false); // Tidak bisa simpan jika mode ubah/hapus
-            btn_batal.setEnabled(true);
+            
         } else {
-            // Jika tidak ada baris terpilih, reset form
             membersihkan_teks();
             nonaktif_teks();
-            btn_ubah.setEnabled(false);
-            btn_hapus.setEnabled(false);
-            btn_simpan.setEnabled(true);
-            btn_batal.setEnabled(false);
         }
     }
     
     private void loadPenyewaToComboBox() {
-        combo_penyewa.removeAllItems(); // combo_penyewa akan kita gunakan untuk memilih sewa aktif
+        combo_penyewa.removeAllItems(); 
         sewaAktifMap.clear();
         sewaBiayaAwalMap.clear();
         sewaTargetKembaliMap.clear();
@@ -292,7 +266,6 @@ public class selesai extends javax.swing.JFrame {
             Connection kon = DriverManager.getConnection(database, user, pass);
             Statement stt = kon.createStatement();
 
-            // Ambil sewa yang statusnya 'aktif'
             String SQL = "SELECT " +
                          "    s.id_sewa, " +
                          "    p.nama_pelanggan, " +
@@ -307,14 +280,14 @@ public class selesai extends javax.swing.JFrame {
                          "JOIN " +
                          "    motor m ON s.id_motor = m.id_motor " +
                          "WHERE " +
-                         "    s.status_sewa = 'aktif' " + // HANYA SEWA YANG AKTIF
+                         "    s.status_sewa = 'aktif' " + 
                          "ORDER BY s.tanggal_peminjaman DESC";
 
             ResultSet res = stt.executeQuery(SQL);
 
             String defaultItemText = "Pilih Sewa Aktif";
             model.addElement(defaultItemText);
-            sewaAktifMap.put(defaultItemText, 0); // ID 0 untuk "Pilih Sewa Aktif"
+            sewaAktifMap.put(defaultItemText, 0); 
 
             while (res.next()) {
                 int idSewa = res.getInt("id_sewa");
@@ -322,12 +295,14 @@ public class selesai extends javax.swing.JFrame {
                 String platNomor = res.getString("plat_nomor");
                 double biayaSewaAwal = res.getDouble("harga_sewa_awal");
                 Timestamp tanggalTargetKembali = res.getTimestamp("tanggal_kembali");
+                Timestamp tanggalPeminjaman = res.getTimestamp("tanggal_peminjaman");
 
                 String displayString = idSewa + " - " + namaPelanggan + " (" + platNomor + ")";
                 model.addElement(displayString);
                 sewaAktifMap.put(displayString, idSewa);
                 sewaBiayaAwalMap.put(idSewa, biayaSewaAwal);
                 sewaTargetKembaliMap.put(idSewa, tanggalTargetKembali);
+                sewaPeminjamanMap.put(idSewa, tanggalPeminjaman);
             }
 
             combo_penyewa.setModel(model);
@@ -340,8 +315,7 @@ public class selesai extends javax.swing.JFrame {
             System.exit(0);
         }
     }
-    
-    // --- Handler ketika item di combo_penyewa dipilih atau tanggal/jam/kondisi berubah ---
+
      private void updateCalculatedFields() {
         String selectedDisplayString = (String) combo_penyewa.getSelectedItem();
         int idSewa = 0;
@@ -351,14 +325,19 @@ public class selesai extends javax.swing.JFrame {
 
         if (idSewa > 0) {
             Timestamp tanggalTargetKembali = sewaTargetKembaliMap.get(idSewa);
+            Timestamp tanggalPeminjaman = sewaPeminjamanMap.get(idSewa);
             double biayaSewaAwal = sewaBiayaAwalMap.get(idSewa);
 
-            // === Tampilkan Tanggal Seharusnya Dikembalikan ===
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy HH:mm"); // Format yang lebih lengkap
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy HH:mm");
             if (tanggalTargetKembali != null) {
                 txt_tanggal_kembali_seharusnya.setText(dateFormat.format(tanggalTargetKembali));
             } else {
                 txt_tanggal_kembali_seharusnya.setText("N/A");
+            }
+            if (tanggalPeminjaman != null) {
+                txt_tanggal_peminjaman.setText(dateFormat.format(tanggalPeminjaman));
+            } else {
+                txt_tanggal_peminjaman.setText("N/A");
             }
 
             Date tglKembaliActualDate = tanggal_dikembalikan.getDate();
@@ -367,11 +346,10 @@ public class selesai extends javax.swing.JFrame {
 
             double dendaTelat = 0.0;
             double dendaKerusakan = 0.0;
-            double totalBiayaYangHarusDibayar = 0.0; // Ini yang akan ditampilkan di txt_jumlah_harus_dibayarkan
+            double totalBiayaYangHarusDibayar = 0.0;
 
-            // Hanya hitung denda jika tanggal aktual sudah diisi
             if (tglKembaliActualDate != null) { 
-                dendaTelat = hitungDendaTelat(tanggalTargetKembali, tglKembaliActualDate, jamAktual, menitAktual, biayaSewaAwal); // Passing biayaSewaAwal
+                dendaTelat = hitungDendaTelat(tanggalTargetKembali, tglKembaliActualDate, jamAktual, menitAktual, biayaSewaAwal); 
                 
                 String kondisiMotor = (String) combo_kondisi.getSelectedItem();
                 if (kondisiMotor != null) {
@@ -384,24 +362,20 @@ public class selesai extends javax.swing.JFrame {
                 }
                 totalBiayaYangHarusDibayar = biayaSewaAwal + dendaTelat + dendaKerusakan;
             } else {
-                // Jika tanggal aktual belum diisi, hanya tampilkan harga_sewa_awal
                 totalBiayaYangHarusDibayar = biayaSewaAwal;
             }
 
             double totalDendaYangDitampilkan = dendaTelat + dendaKerusakan;
             
-            txt_jumlahdenda1.setText(String.format("%.2f", totalDendaYangDitampilkan)); // Tampilkan TOTAL denda
-            txt_jumlah_harus_dibayarkan.setText(String.format("%.2f", totalBiayaYangHarusDibayar)); // Update JML HARUS DIBAYARKAN
+            txt_jumlah_denda.setText(String.format("%.2f", totalDendaYangDitampilkan)); 
+            txt_jumlah_harus_dibayarkan.setText(String.format("%.2f", totalBiayaYangHarusDibayar)); 
 
         } else {
-            // Reset tampilan jika "Pilih Sewa Aktif" dipilih
-            txt_jumlahdenda1.setText("0.0");
             txt_jumlah_harus_dibayarkan.setText("0.0");
             txt_tanggal_kembali_seharusnya.setText("");
         }
     }
-    
-    // --- REVISI FUNGSI hitungDendaTelat() ---
+
     private double hitungDendaTelat(Timestamp tanggalTargetKembali, Date tanggalAktual, int jamAktual, int menitAktual, double hargaSewaAwal) {
         if (tanggalTargetKembali == null || tanggalAktual == null) {
             return 0.0;
@@ -417,38 +391,103 @@ public class selesai extends javax.swing.JFrame {
         calAktual.set(Calendar.SECOND, 0);
         calAktual.set(Calendar.MILLISECOND, 0);
 
-        // Jika waktu aktual lebih awal atau sama dengan waktu target, tidak ada denda
         if (calAktual.compareTo(calTarget) <= 0) {
             return 0.0;
         }
 
         long diffMillis = calAktual.getTimeInMillis() - calTarget.getTimeInMillis();
-        // Gunakan diffHoursFraction untuk perhitungan denda progresif
         double diffHoursFraction = (double)diffMillis / (1000.0 * 60 * 60); 
 
         double denda = 0.0;
-        double dendaPerJam = 10000.0; // Denda Rp 10.000 per jam
+        double dendaPerJam = 10000.0; 
 
-        // Aturan denda progresif:
-        // Jika telat lebih dari 4 jam, maka denda dihitung berdasarkan pembulatan ke atas per 24 jam (hari penuh),
-        // menggunakan hargaSewaAwal sebagai tarif per harinya.
-        // Jika telat 4 jam atau kurang, denda dihitung per jam (dibulatkan ke atas).
-        
         if (diffHoursFraction > 4.0) {
-            // Hitung berapa total hari penuh yang dibulatkan ke atas.
-            // Contoh: 4.1 jam -> ceil(4.1/24) = ceil(0.17) = 1 hari
-            // Contoh: 24.1 jam -> ceil(24.1/24) = ceil(1.004) = 2 hari
             long totalDaysCeiled = (long) Math.ceil(diffHoursFraction / 24.0);
-            denda = totalDaysCeiled * hargaSewaAwal; // Denda dihitung per hari penuh
+            denda = totalDaysCeiled * hargaSewaAwal;
         } else {
-            // Jika telat 4 jam atau kurang, denda per jam (dibulatkan ke atas ke jam terdekat)
             denda = Math.ceil(diffHoursFraction) * dendaPerJam;
         }
         
         return denda;
     }
 
-    
+    private void sorting(){
+         // TODO add your handling code here:
+        String sort = (String) combo_sort.getSelectedItem();
+        tableMode1.setRowCount(0);
+        String sortOrder = "";
+        if (sort=="Termurah") { 
+            sortOrder = "ASC";
+        } else if (sort=="Termahal") { 
+            sortOrder = "DESC";
+        }
+        try
+        {
+            Class.forName(driver);
+            Connection kon = DriverManager.getConnection(
+                    database,
+                    user,
+                    pass
+            );
+            Statement stt=kon.createStatement();
+
+            String SQL = "SELECT " +
+                         "    sl.id_selesai, " +                 
+                         "    sl.id_sewa, " +                     
+                         "    p.nama_pelanggan, " +               
+                         "    m.merk, " +                       
+                         "    m.plat_nomor, " +                  
+                         "    s.tanggal_peminjaman, " +          
+                         "    s.tanggal_kembali, " +  
+                         "    sl.tanggal_kembali_aktual, " + 
+                         "    sl.kondisi_motor_kembali, " +       
+                         "    sl.total_denda, " + 
+                         "    sl.total_biaya, " +          
+                         "    sl.jumlah_sudah_dibayar, " +   
+                         "    sl.status_pembayaran " +            
+                         "FROM " +
+                         "    selesai sl " +                     
+                         "JOIN " +
+                         "    sewa s ON sl.id_sewa = s.id_sewa " +
+                         "JOIN " +
+                         "    pelanggan p ON s.id_pelanggan = p.id_pelanggan " + 
+                         "JOIN " +
+                         "    motor m ON s.id_motor = m.id_motor " + 
+                         "ORDER BY " +
+                         "    sl.tanggal_kembali_aktual "+sortOrder; 
+            
+            ResultSet res = stt.executeQuery(SQL);
+            while(res.next())
+            {
+                Object[] data = new Object[13]; 
+                data[0] = res.getString(1);
+                data[1] = res.getString(2);
+                data[2] = res.getString(3);
+                data[3] = res.getString(4);
+                data[4] = res.getString(5);
+                data[5] = res.getString(6);
+                data[6] = res.getString(7);
+                data[7] = res.getString(8);
+                data[8] = res.getString(9);
+                data[9] = res.getString(10);
+                data[10] = res.getString(11);
+                data[11] = res.getString(12);
+                data[12] = res.getString(13);
+                tableMode1.addRow(data);
+            } 
+            res.close();
+            stt.close();
+            kon.close();
+        }
+        catch (Exception ex)
+        {
+            System.err.println(ex.getMessage());
+            JOptionPane.showMessageDialog(null,
+                    ex.getMessage(),"error",
+                    JOptionPane.INFORMATION_MESSAGE);
+            System.exit(0);
+        }
+    }
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -472,12 +511,11 @@ public class selesai extends javax.swing.JFrame {
         btn_simpan = new javax.swing.JButton();
         jLabel10 = new javax.swing.JLabel();
         btn_hapus = new javax.swing.JButton();
-        txt_jumlahdenda1 = new javax.swing.JTextField();
-        combo_urut = new javax.swing.JComboBox();
+        txt_cari = new javax.swing.JTextField();
+        combo_sort = new javax.swing.JComboBox();
         jLabel8 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        btn_urut1 = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         jLabel2 = new javax.swing.JLabel();
         combo_penyewa = new javax.swing.JComboBox();
@@ -499,6 +537,10 @@ public class selesai extends javax.swing.JFrame {
         txt_jumlah_harus_dibayarkan = new javax.swing.JTextField();
         jLabel17 = new javax.swing.JLabel();
         jSeparator2 = new javax.swing.JSeparator();
+        jLabel18 = new javax.swing.JLabel();
+        txt_jumlah_denda = new javax.swing.JTextField();
+        txt_tanggal_peminjaman = new javax.swing.JTextField();
+        jLabel19 = new javax.swing.JLabel();
 
         jLabel3.setText("jLabel3");
 
@@ -582,16 +624,16 @@ public class selesai extends javax.swing.JFrame {
             }
         });
 
-        txt_jumlahdenda1.addActionListener(new java.awt.event.ActionListener() {
+        txt_cari.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txt_jumlahdenda1ActionPerformed(evt);
+                txt_cariActionPerformed(evt);
             }
         });
 
-        combo_urut.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Nama", "Total Bayar" }));
-        combo_urut.addActionListener(new java.awt.event.ActionListener() {
+        combo_sort.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Termurah", "Termahal" }));
+        combo_sort.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                combo_urutActionPerformed(evt);
+                combo_sortActionPerformed(evt);
             }
         });
 
@@ -608,24 +650,17 @@ public class selesai extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(616, 616, 616)
+                .addGap(744, 744, 744)
                 .addComponent(jLabel1)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(17, Short.MAX_VALUE)
                 .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(20, 20, 20))
         );
-
-        btn_urut1.setText("Urutkan");
-        btn_urut1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btn_urut1ActionPerformed(evt);
-            }
-        });
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel2.setText("Penyewa");
@@ -673,66 +708,61 @@ public class selesai extends javax.swing.JFrame {
         });
 
         jLabel16.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jLabel16.setText("Jam Kembali Seharusnya");
+        jLabel16.setText("Tanggal Kembali Seharusnya");
 
         jLabel17.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jLabel17.setText("Jumlah yang harus diabayarkan");
+        jLabel17.setText("Harga Sewa Awal");
+
+        jLabel18.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabel18.setText("Denda Telat");
+
+        jLabel19.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabel19.setText("Tanggal Peminjaman");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(527, 527, 527)
-                        .addComponent(btn_tambah, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btn_simpan)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btn_ubah)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btn_hapus)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btn_batal)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jSeparator1)
-                            .addComponent(jSeparator4, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jSeparator5, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jScrollPane1)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(30, 30, 30)
-                                .addComponent(jLabel10)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txt_jumlahdenda1, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btn_cari)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btn_tampil, javax.swing.GroupLayout.PREFERRED_SIZE, 264, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel8)
-                                .addGap(18, 18, 18)
-                                .addComponent(combo_urut, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btn_urut1)))))
-                .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addGap(57, 57, 57)
-                .addComponent(jLabel16)
-                .addGap(65, 65, 65)
-                .addComponent(txt_tanggal_kembali_seharusnya, javax.swing.GroupLayout.PREFERRED_SIZE, 343, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(89, 89, 89)
-                .addComponent(jLabel17)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 113, Short.MAX_VALUE)
-                .addComponent(txt_jumlah_harus_dibayarkan, javax.swing.GroupLayout.PREFERRED_SIZE, 343, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(61, 61, 61))
             .addComponent(jSeparator2)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator1)
+                    .addComponent(jSeparator4, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jSeparator5, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel10)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txt_cari, javax.swing.GroupLayout.PREFERRED_SIZE, 274, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btn_cari)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btn_tampil, javax.swing.GroupLayout.PREFERRED_SIZE, 264, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel8)
+                        .addGap(18, 18, 18)
+                        .addComponent(combo_sort, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel19)
+                        .addGap(18, 18, 18)
+                        .addComponent(txt_tanggal_peminjaman, javax.swing.GroupLayout.PREFERRED_SIZE, 224, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(59, 59, 59)
+                        .addComponent(jLabel16)
+                        .addGap(18, 18, 18)
+                        .addComponent(txt_tanggal_kembali_seharusnya, javax.swing.GroupLayout.PREFERRED_SIZE, 224, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(75, 75, 75)
+                        .addComponent(jLabel18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txt_jumlah_denda, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 100, Short.MAX_VALUE)
+                        .addComponent(jLabel17)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txt_jumlah_harus_dibayarkan, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addGap(91, 91, 91)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel9)
@@ -742,7 +772,7 @@ public class selesai extends javax.swing.JFrame {
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(combo_penyewa, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(144, 144, 144)
+                .addGap(155, 155, 155)
                 .addComponent(jLabel6)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -766,7 +796,19 @@ public class selesai extends javax.swing.JFrame {
                         .addComponent(jLabel7)
                         .addGap(18, 18, 18)
                         .addComponent(combo_kondisi, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                .addGap(105, 105, 105))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(630, 630, 630)
+                .addComponent(btn_tambah, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btn_simpan)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btn_ubah)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btn_hapus)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btn_batal)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btn_batal, btn_hapus, btn_simpan, btn_tambah, btn_ubah});
@@ -775,17 +817,21 @@ public class selesai extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(20, 20, 20)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txt_tanggal_peminjaman, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txt_tanggal_kembali_seharusnya, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txt_jumlah_harus_dibayarkan, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txt_jumlah_denda, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txt_jumlah_harus_dibayarkan, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(25, 25, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(jLabel2)
@@ -797,10 +843,9 @@ public class selesai extends javax.swing.JFrame {
                             .addComponent(jLabel9)
                             .addComponent(combo_penyewa1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(combo_kondisi, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel7))
-                        .addGap(33, 33, 33))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(44, 44, 44)
+                            .addComponent(jLabel7)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
@@ -814,17 +859,17 @@ public class selesai extends javax.swing.JFrame {
                                     .addComponent(jam_dikembalikan)
                                     .addComponent(tanggal_dikembalikan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                        .addGap(23, 23, 23)))
+                .addGap(18, 18, 18)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 13, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txt_jumlahdenda1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txt_cari, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btn_cari)
                     .addComponent(btn_tampil)
-                    .addComponent(combo_urut, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8)
-                    .addComponent(btn_urut1))
+                    .addComponent(combo_sort, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -841,7 +886,7 @@ public class selesai extends javax.swing.JFrame {
                 .addGap(21, 21, 21))
         );
 
-        layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {btn_cari, btn_tampil, btn_urut1, combo_urut, jLabel10, jLabel8, txt_jumlahdenda1});
+        layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {btn_cari, btn_tampil, combo_sort, jLabel10, jLabel8, txt_cari});
 
         layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {btn_batal, btn_hapus, btn_simpan, btn_tambah, btn_ubah});
 
@@ -878,11 +923,9 @@ public class selesai extends javax.swing.JFrame {
         return;
     }
 
-    // 2. Ambil ID kunci dari baris yang dipilih
     String idSelesaiToUpdate = tableMode1.getValueAt(row, 0).toString();
     int idSewaTerkait = Integer.parseInt(tableMode1.getValueAt(row, 1).toString());
 
-    // 3. Ambil data terbaru dari semua komponen input di form
     Date tglKembaliDate = tanggal_dikembalikan.getDate();
     if (tglKembaliDate == null) {
         JOptionPane.showMessageDialog(this, "Tanggal kembali aktual harus diisi.", "Peringatan", JOptionPane.WARNING_MESSAGE);
@@ -892,7 +935,6 @@ public class selesai extends javax.swing.JFrame {
     int jam = (Integer) jam_dikembalikan.getValue();
     int menit = (Integer) menit_dikembalikan.getValue();
 
-    // Buat timestamp dari tanggal & jam aktual yang baru
     Calendar calAktual = Calendar.getInstance();
     calAktual.setTime(tglKembaliDate);
     calAktual.set(Calendar.HOUR_OF_DAY, jam);
@@ -921,7 +963,6 @@ public class selesai extends javax.swing.JFrame {
         return;
     }
 
-    // 4. Hitung ulang semua biaya berdasarkan input baru
     double biayaSewaAwal = 0;
     Timestamp tanggalTargetKembali = null;
     try (Connection kon = DriverManager.getConnection(database, user, pass);
@@ -962,19 +1003,16 @@ public class selesai extends javax.swing.JFrame {
         statusPembayaran = "Belum Bayar";
     }
 
-    // 5. Jalankan proses UPDATE dalam sebuah transaksi
     Connection kon = null;
     try {
         kon = DriverManager.getConnection(database, user, pass);
-        kon.setAutoCommit(false); // Mulai transaksi
+        kon.setAutoCommit(false); 
 
-        // Langkah A: Hapus semua denda lama yang terkait dengan id_sewa ini
         try (PreparedStatement pstDeleteDenda = kon.prepareStatement("DELETE FROM denda WHERE id_sewa = ?")) {
             pstDeleteDenda.setInt(1, idSewaTerkait);
             pstDeleteDenda.executeUpdate();
         }
 
-        // Langkah B: Masukkan kembali denda baru (jika ada)
         if (dendaTelatFinal > 0) {
             String sqlDendaTelat = "INSERT INTO denda (id_sewa, jenis_denda, detail_denda, jumlah_denda, keterangan_denda) VALUES (?, ?, ?, ?, ?)";
             try (PreparedStatement pstInsertDenda = kon.prepareStatement(sqlDendaTelat)) {
@@ -1000,7 +1038,6 @@ public class selesai extends javax.swing.JFrame {
             }
         }
         
-        // Langkah C: Update tabel 'selesai' dengan semua data yang baru
         String sqlUpdateSelesai = "UPDATE selesai SET tanggal_kembali_aktual = ?, kondisi_motor_kembali = ?, total_denda = ?, total_biaya = ?, jumlah_sudah_dibayar = ?, status_pembayaran = ?, metode_pembayaran = ? WHERE id_selesai = ?";
         try (PreparedStatement pstUpdateSelesai = kon.prepareStatement(sqlUpdateSelesai)) {
             pstUpdateSelesai.setTimestamp(1, tanggalKembaliAktual);
@@ -1014,7 +1051,7 @@ public class selesai extends javax.swing.JFrame {
             
             int rowsUpdated = pstUpdateSelesai.executeUpdate();
             if (rowsUpdated > 0) {
-                 kon.commit(); // Commit transaksi jika semua berhasil
+                 kon.commit(); 
                  JOptionPane.showMessageDialog(this, "Data transaksi selesai berhasil diubah!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
                  membersihkan_teks();
                  nonaktif_teks();
@@ -1022,7 +1059,7 @@ public class selesai extends javax.swing.JFrame {
                  btn_hapus.setEnabled(false);
                  btn_batal.setEnabled(false);
                  btn_simpan.setEnabled(true);
-                 settableload(); // Muat ulang tabel
+                 settableload(); 
             } else {
                 kon.rollback();
                 JOptionPane.showMessageDialog(this, "Gagal mengubah data transaksi selesai. Data tidak ditemukan.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -1070,7 +1107,7 @@ public class selesai extends javax.swing.JFrame {
         calAktual.set(Calendar.MILLISECOND, 0);
         Timestamp tanggalKembaliAktual = new Timestamp(calAktual.getTimeInMillis());
 
-        String kondisiMotor = (String) combo_kondisi.getSelectedItem(); // Gunakan combo_kondisi
+        String kondisiMotor = (String) combo_kondisi.getSelectedItem();
         if (kondisiMotor == null || kondisiMotor.equals("--- Pilih Kondisi ---")) {
             JOptionPane.showMessageDialog(this, "Kondisi motor harus dipilih.", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
@@ -1090,7 +1127,6 @@ public class selesai extends javax.swing.JFrame {
             return;
         }
 
-        // --- RE-CALCULATE Denda dan Total Biaya Akhir TEPAT SEBELUM INSERT ---
         double biayaSewaAwal = sewaBiayaAwalMap.get(idSewa);
         Timestamp tanggalTargetKembali = sewaTargetKembaliMap.get(idSewa);
 
@@ -1127,11 +1163,11 @@ public class selesai extends javax.swing.JFrame {
         try {
             Class.forName(driver);
             kon = DriverManager.getConnection(database, user, pass);
-            kon.setAutoCommit(false); // Mulai transaksi
+            kon.setAutoCommit(false); 
 
-            // INSERT ke tabel 'selesai'
             String SQL_INSERT_SELESAI = "INSERT INTO selesai (id_sewa, tanggal_kembali_aktual, kondisi_motor_kembali, total_denda, total_biaya, jumlah_sudah_dibayar, status_pembayaran, metode_pembayaran) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            
             psInsertSelesai = kon.prepareStatement(SQL_INSERT_SELESAI);
             psInsertSelesai.setInt(1, idSewa);
             psInsertSelesai.setTimestamp(2, tanggalKembaliAktual);
@@ -1144,41 +1180,34 @@ public class selesai extends javax.swing.JFrame {
 
             int rowsInsertedSelesai = psInsertSelesai.executeUpdate();
 
-            // INSERT ke tabel 'denda' jika ada denda telat
             if (dendaTelatFinal > 0) {
-                // Perubahan di sini: Menambahkan 'detail_denda'
                 String SQL_INSERT_DENDA_TELAT = "INSERT INTO denda (id_sewa, jenis_denda, detail_denda, jumlah_denda, keterangan_denda) VALUES (?, ?, ?, ?, ?)";
                 psInsertDendaTelat = kon.prepareStatement(SQL_INSERT_DENDA_TELAT);
                 psInsertDendaTelat.setInt(1, idSewa);
                 psInsertDendaTelat.setString(2, "Terlambat");
                 
-                // Detail Denda Telat: Jam keterlambatan
                 long diffMillisTelat = tanggalKembaliAktual.getTime() - tanggalTargetKembali.getTime();
                 long diffHoursTelat = (long) Math.ceil((double) diffMillisTelat / (1000.0 * 60 * 60));
-                psInsertDendaTelat.setString(3, diffHoursTelat + " jam"); // Isi detail_denda di sini
+                psInsertDendaTelat.setString(3, diffHoursTelat + " jam"); 
                 
                 psInsertDendaTelat.setDouble(4, dendaTelatFinal);
                 psInsertDendaTelat.setString(5, "Denda keterlambatan pengembalian motor.");
                 psInsertDendaTelat.executeUpdate();
             }
 
-            // INSERT ke tabel 'denda' jika ada denda kerusakan
             if (dendaKerusakanFinal > 0 && !kondisiMotor.equals("Baik")) {
-                // Perubahan di sini: Menambahkan 'detail_denda'
                 String SQL_INSERT_DENDA_KERUSAKAN = "INSERT INTO denda (id_sewa, jenis_denda, detail_denda, jumlah_denda, keterangan_denda) VALUES (?, ?, ?, ?, ?)";
                 psInsertDendaKerusakan = kon.prepareStatement(SQL_INSERT_DENDA_KERUSAKAN);
                 psInsertDendaKerusakan.setInt(1, idSewa);
                 psInsertDendaKerusakan.setString(2, "Kerusakan");
                 
-                // Detail Denda Kerusakan: Kondisi motor
-                psInsertDendaKerusakan.setString(3, kondisiMotor); // Isi detail_denda di sini
+                psInsertDendaKerusakan.setString(3, kondisiMotor); 
                 
                 psInsertDendaKerusakan.setDouble(4, dendaKerusakanFinal);
                 psInsertDendaKerusakan.setString(5, "Kerusakan: " + kondisiMotor);
                 psInsertDendaKerusakan.executeUpdate();
             }
 
-            // UPDATE status_sewa di tabel 'sewa'
             String SQL_UPDATE_SEWA = "UPDATE sewa SET status_sewa = 'selesai' WHERE id_sewa = ?";
             psUpdateSewa = kon.prepareStatement(SQL_UPDATE_SEWA);
             psUpdateSewa.setInt(1, idSewa);
@@ -1192,7 +1221,7 @@ public class selesai extends javax.swing.JFrame {
                 btn_simpan.setEnabled(false);
                 btn_batal.setEnabled(false);
                 loadPenyewaToComboBox();
-                settableload(); // Muat ulang tabel selesai
+                settableload(); 
             } else {
                 kon.rollback();
                 JOptionPane.showMessageDialog(this, "Gagal mencatat transaksi selesai atau memperbarui status sewa.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -1227,7 +1256,7 @@ public class selesai extends javax.swing.JFrame {
             tableMode1.removeRow(row);
 
             JOptionPane.showMessageDialog(null, "Data denda berhasil dihapus!");
-            membersihkan_teks(); // Clear fields after successful deletion
+            membersihkan_teks();
   
             btn_ubah.setEnabled(false);
             btn_hapus.setEnabled(false);
@@ -1241,17 +1270,13 @@ public class selesai extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btn_hapusActionPerformed
 
-    private void txt_jumlahdenda1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_jumlahdenda1ActionPerformed
+    private void txt_cariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_cariActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txt_jumlahdenda1ActionPerformed
+    }//GEN-LAST:event_txt_cariActionPerformed
 
-    private void combo_urutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_combo_urutActionPerformed
+    private void combo_sortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_combo_sortActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_combo_urutActionPerformed
-
-    private void btn_urut1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_urut1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btn_urut1ActionPerformed
+    }//GEN-LAST:event_combo_sortActionPerformed
 
     private void combo_penyewaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_combo_penyewaActionPerformed
         // TODO add your handling code here:
@@ -1321,6 +1346,7 @@ public class selesai extends javax.swing.JFrame {
     private Map<String, Integer> sewaAktifMap;
     private Map<Integer, Double> sewaBiayaAwalMap;
     private Map<Integer, Timestamp> sewaTargetKembaliMap;
+    private Map<Integer, Timestamp> sewaPeminjamanMap;
     private javax.swing.JLabel jLabelJumlahHarusDibayarkan;
     private java.util.Map<String, Integer> penggunaMap;
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1331,17 +1357,18 @@ public class selesai extends javax.swing.JFrame {
     private javax.swing.JButton btn_tambah;
     private javax.swing.JButton btn_tampil;
     private javax.swing.JButton btn_ubah;
-    private javax.swing.JButton btn_urut1;
     private javax.swing.JComboBox combo_kondisi;
     private javax.swing.JComboBox combo_penyewa;
     private javax.swing.JComboBox combo_penyewa1;
-    private javax.swing.JComboBox combo_urut;
+    private javax.swing.JComboBox combo_sort;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -1360,9 +1387,11 @@ public class selesai extends javax.swing.JFrame {
     private javax.swing.JSpinner menit_dikembalikan;
     private javax.swing.JTable table_selesai;
     private com.toedter.calendar.JDateChooser tanggal_dikembalikan;
+    private javax.swing.JTextField txt_cari;
+    private javax.swing.JTextField txt_jumlah_denda;
     private javax.swing.JTextField txt_jumlah_dibayarkan;
     private javax.swing.JTextField txt_jumlah_harus_dibayarkan;
-    private javax.swing.JTextField txt_jumlahdenda1;
     private javax.swing.JTextField txt_tanggal_kembali_seharusnya;
+    private javax.swing.JTextField txt_tanggal_peminjaman;
     // End of variables declaration//GEN-END:variables
 }

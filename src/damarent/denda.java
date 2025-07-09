@@ -74,7 +74,7 @@ public class denda extends javax.swing.JFrame {
     
     private void settableload()
     {
-        tableMode1.setRowCount(0); // Kosongkan tabel
+        tableMode1.setRowCount(0); 
         
         Connection kon = null;
         Statement stt = null;
@@ -84,36 +84,34 @@ public class denda extends javax.swing.JFrame {
             Class.forName(driver);
             kon = DriverManager.getConnection(database, user, pass);
             stt = kon.createStatement();
-            
-            // === Kueri SQL yang Direvisi (menambahkan d.detail_denda) ===
+         
             String SQL = "SELECT " +
                          "    d.id_denda, " +
                          "    d.id_sewa, " +
-                         "    p.nama_pelanggan, " + // Dari tabel pengguna
+                         "    p.nama_pelanggan, " + 
                          "    d.jenis_denda, " +
-                         "    d.detail_denda, " +   // Kolom DETAIL DENDA
+                         "    d.detail_denda, " +   
                          "    d.jumlah_denda, " +
-                         "    d.keterangan_denda " + // Keterangan Denda
+                         "    d.keterangan_denda " + 
                          "FROM " +
-                         "    denda d " + // Alias tabel denda sebagai 'd'
+                         "    denda d " + 
                          "JOIN " +
-                         "    sewa s ON d.id_sewa = s.id_sewa " + // Alias tabel sewa sebagai 's'
+                         "    sewa s ON d.id_sewa = s.id_sewa " + 
                          "JOIN " +
-                         "    pelanggan p ON s.id_pelanggan = p.id_pelanggan " + // Alias tabel pengguna sebagai 'p'
+                         "    pelanggan p ON s.id_pelanggan = p.id_pelanggan " + 
                          "ORDER BY d.id_denda DESC";
             
             res = stt.executeQuery(SQL);
             
             while (res.next()) {
-                // === SESUAIKAN UKURAN ARRAY DENGAN JUMLAH KOLOM DI SELECT (SEKARANG 7 KOLOM) ===
                 Object[] rowData = new Object[7]; 
                 rowData[0] = res.getInt("id_denda");
                 rowData[1] = res.getInt("id_sewa");
-                rowData[2] = res.getString("nama_pelanggan"); // Nama pelanggan
+                rowData[2] = res.getString("nama_pelanggan"); 
                 rowData[3] = res.getString("jenis_denda");
-                rowData[4] = res.getString("detail_denda");  // Ambil detail_denda
+                rowData[4] = res.getString("detail_denda");  
                 rowData[5] = res.getDouble("jumlah_denda");
-                rowData[6] = res.getString("keterangan_denda"); // Keterangan denda
+                rowData[6] = res.getString("keterangan_denda"); 
                 
                 tableMode1.addRow(rowData);
             }
@@ -174,9 +172,8 @@ public class denda extends javax.swing.JFrame {
     
      public void membersihkan_teks() {
         txt_keterangan.setText("");
-        txt_detail_denda.setText(""); // Bersihkan field detail denda
-        txt_jumlah_denda.setText(""); // Bersihkan txt_jumlah_denda
-        
+        txt_detail_denda.setText(""); 
+        txt_jumlah_denda.setText("");
         if (combo_penyewa.getItemCount() > 0) combo_penyewa.setSelectedIndex(0);
         if (combo_jenis.getItemCount() > 0) combo_jenis.setSelectedIndex(0);
     }
@@ -190,11 +187,10 @@ public class denda extends javax.swing.JFrame {
             String idSewaDisplay = tableMode1.getValueAt(row, 1).toString();
             String namaPenyewa = tableMode1.getValueAt(row, 2).toString();
             String jenisDenda = tableMode1.getValueAt(row, 3).toString();
-            String detailDenda = tableMode1.getValueAt(row, 4) != null ? tableMode1.getValueAt(row, 4).toString() : ""; // Ambil Detail Denda
+            String detailDenda = tableMode1.getValueAt(row, 4) != null ? tableMode1.getValueAt(row, 4).toString() : ""; 
             Double jumlahDenda = (Double) tableMode1.getValueAt(row, 5); // Ambil Jumlah Denda
-            String keteranganDenda = tableMode1.getValueAt(row, 6) != null ? tableMode1.getValueAt(row, 6).toString() : ""; // Ambil Keterangan Denda
+            String keteranganDenda = tableMode1.getValueAt(row, 6) != null ? tableMode1.getValueAt(row, 6).toString() : ""; 
 
-            // Pilih item yang cocok di combo_penyewa
             for (int i = 0; i < combo_penyewa.getItemCount(); i++) {
                 String itemText = (String) combo_penyewa.getItemAt(i);
                 // Kita mencari item yang dimulai dengan ID Sewa yang cocok
@@ -205,17 +201,15 @@ public class denda extends javax.swing.JFrame {
             }
 
             combo_jenis.setSelectedItem(jenisDenda);
-            txt_detail_denda.setText(detailDenda); // Isi field detail denda
-            txt_jumlah_denda.setText(String.valueOf(jumlahDenda)); // Isi field jumlah denda
-            txt_keterangan.setText(keteranganDenda); // Isi field keterangan denda
+            txt_detail_denda.setText(detailDenda); 
+            txt_jumlah_denda.setText(String.valueOf(jumlahDenda)); 
+            txt_keterangan.setText(keteranganDenda); 
 
-            // Atur status tombol
             btn_ubah.setEnabled(true);
             btn_hapus.setEnabled(true);
             btn_simpan.setEnabled(false);
             btn_tambah.setEnabled(true);
         } else {
-            // Jika tidak ada baris terpilih, reset status tombol
             btn_ubah.setEnabled(false);
             btn_hapus.setEnabled(false);
             btn_simpan.setEnabled(true);
@@ -244,7 +238,6 @@ public class denda extends javax.swing.JFrame {
         combo_penyewa = new javax.swing.JComboBox();
         jLabel12 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
-        btn_sort = new javax.swing.JButton();
         txt_cari = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         combo_kategori = new javax.swing.JComboBox();
@@ -322,13 +315,6 @@ public class denda extends javax.swing.JFrame {
         jLabel8.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel8.setText("Cari");
 
-        btn_sort.setText("Sort");
-        btn_sort.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btn_sortActionPerformed(evt);
-            }
-        });
-
         txt_cari.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txt_cariActionPerformed(evt);
@@ -338,7 +324,7 @@ public class denda extends javax.swing.JFrame {
         jLabel2.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel2.setText("Penyewa");
 
-        combo_kategori.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Nama", "Plat Nomor", "Status" }));
+        combo_kategori.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Nama", "Jenis Denda", "ID Denda", " " }));
         combo_kategori.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 combo_kategoriActionPerformed(evt);
@@ -353,10 +339,10 @@ public class denda extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jSeparator3)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(691, 691, 691)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(785, 785, 785))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -455,13 +441,10 @@ public class denda extends javax.swing.JFrame {
                                 .addComponent(btn_cari, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
                                 .addComponent(btn_tampil_semua, javax.swing.GroupLayout.PREFERRED_SIZE, 264, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(34, 34, 34)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel12)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(combo_sort, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btn_sort, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGap(11, 11, 11)))
+                                .addComponent(combo_sort, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addContainerGap())
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel2)
@@ -507,21 +490,19 @@ public class denda extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(txt_cari, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btn_cari)
+                    .addComponent(combo_kategori, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btn_tampil_semua, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(combo_sort, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel12)
-                        .addComponent(btn_sort, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel8)
-                        .addComponent(txt_cari, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btn_cari)
-                        .addComponent(combo_kategori, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btn_tampil_semua, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel12)))
+                .addGap(12, 12, 12)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 476, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 478, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(8, 8, 8)
@@ -547,11 +528,8 @@ public class denda extends javax.swing.JFrame {
 
     private void btn_tampil_semuaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_tampil_semuaActionPerformed
         // TODO add your handling code here:
+        settableload();
     }//GEN-LAST:event_btn_tampil_semuaActionPerformed
-
-    private void btn_sortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_sortActionPerformed
-
-    }//GEN-LAST:event_btn_sortActionPerformed
 
     private void txt_cariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_cariActionPerformed
         // TODO add your handling code here:
@@ -562,7 +540,76 @@ public class denda extends javax.swing.JFrame {
     }//GEN-LAST:event_combo_kategoriActionPerformed
 
     private void btn_cariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_cariActionPerformed
-        // TODO add your handling code here:
+        String keyword = txt_cari.getText();
+        if (keyword.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Kotak pencarian tidak boleh kosong.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            txt_cari.requestFocus();
+            return;
+        }
+
+        tableMode1.setRowCount(0);
+        String kategori = (String) combo_kategori.getSelectedItem();
+        String searchColumn;
+
+        switch (kategori) {
+            case "Nama":
+                searchColumn = "p.nama_pelanggan";
+                break;
+            case "Jenis Denda":
+                searchColumn = "d.jenis_denda";
+                break;
+            case "ID Denda":
+                searchColumn = "d.id_denda";
+                break;
+            default:
+                JOptionPane.showMessageDialog(this, "Kategori pencarian tidak valid.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+        }
+
+        String sql = "SELECT " +
+                     "  d.id_denda, d.id_sewa, p.nama_pelanggan, d.jenis_denda, " +
+                     "  d.detail_denda, d.jumlah_denda, d.keterangan_denda " +
+                     "FROM " +
+                     "  denda d " +
+                     "JOIN " +
+                     "  sewa s ON d.id_sewa = s.id_sewa " +
+                     "JOIN " +
+                     "  pelanggan p ON s.id_pelanggan = p.id_pelanggan " +
+                     "WHERE " + searchColumn + " LIKE ?";
+
+        try (Connection kon = DriverManager.getConnection(database, user, pass);
+             PreparedStatement pst = kon.prepareStatement(sql)) {
+
+            pst.setString(1, "%" + keyword + "%");
+
+            try (ResultSet res = pst.executeQuery()) {
+                if (!res.isBeforeFirst()) { 
+                    JOptionPane.showMessageDialog(this, "Data tidak ditemukan.", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    while (res.next()) {
+                        Object[] rowData = {
+                            res.getInt("id_denda"),
+                            res.getInt("id_sewa"),
+                            res.getString("nama_pelanggan"),
+                            res.getString("jenis_denda"),
+                            res.getString("detail_denda"),
+                            res.getDouble("jumlah_denda"),
+                            res.getString("keterangan_denda")
+                        };
+                        tableMode1.addRow(rowData);
+                    }
+                }
+            }
+
+        }
+        catch (Exception ex)
+        {
+            System.err.println(ex.getMessage());
+            JOptionPane.showMessageDialog(null,
+                    ex.getMessage(),"error",
+                    JOptionPane.INFORMATION_MESSAGE);
+            System.exit(0);
+        }
     }//GEN-LAST:event_btn_cariActionPerformed
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
@@ -590,12 +637,12 @@ public class denda extends javax.swing.JFrame {
 
         String selectedPenyewaDisplay = (String) combo_penyewa.getSelectedItem();
         String jenisDenda = (String) combo_jenis.getSelectedItem();
-        String detailDenda = txt_detail_denda.getText(); // Ambil dari field detail denda
-        String keteranganDenda = txt_keterangan.getText(); // Ambil dari field keterangan denda
+        String detailDenda = txt_detail_denda.getText(); 
+        String keteranganDenda = txt_keterangan.getText(); 
 
         if (selectedPenyewaDisplay == null || selectedPenyewaDisplay.equals("--- Pilih Sewa (ID - Nama Pelanggan - Plat) ---") ||
             jenisDenda == null || jenisDenda.equals("Jenis Denda") ||
-            detailDenda.isEmpty() || // Validasi detail denda
+            detailDenda.isEmpty() || 
             keteranganDenda.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Semua field wajib diisi!", "Validasi Input", JOptionPane.WARNING_MESSAGE);
             return;
@@ -603,7 +650,7 @@ public class denda extends javax.swing.JFrame {
 
         double jumlahDendaFinal = 0.0;
         try {
-            jumlahDendaFinal = Double.parseDouble(txt_jumlah_denda.getText()); // Mengambil dari txt_jumlah_denda
+            jumlahDendaFinal = Double.parseDouble(txt_jumlah_denda.getText()); 
             if (jumlahDendaFinal <= 0) {
                  JOptionPane.showMessageDialog(this, "Jumlah denda harus lebih dari 0.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
                  return;
@@ -620,7 +667,7 @@ public class denda extends javax.swing.JFrame {
         }
 
         Connection kon = null;
-        PreparedStatement pst = null; // Gunakan PreparedStatement untuk keamanan
+        PreparedStatement pst = null; 
         
         try {
             Class.forName(driver);
@@ -629,7 +676,7 @@ public class denda extends javax.swing.JFrame {
             String SQL = "UPDATE denda SET "
                        + "id_sewa = ?, "
                        + "jenis_denda = ?, "
-                       + "detail_denda = ?, " // Update kolom detail_denda
+                       + "detail_denda = ?, " 
                        + "jumlah_denda = ?, " 
                        + "keterangan_denda = ? " 
                        + "WHERE id_denda = ?";
@@ -637,21 +684,19 @@ public class denda extends javax.swing.JFrame {
             pst = kon.prepareStatement(SQL);
             pst.setInt(1, idSewa);
             pst.setString(2, jenisDenda);
-            pst.setString(3, detailDenda); // Set detail_denda
+            pst.setString(3, detailDenda); 
             pst.setDouble(4, jumlahDendaFinal);
             pst.setString(5, keteranganDenda);
-            pst.setString(6, idDendaToUpdate); // Kondisi WHERE
+            pst.setString(6, idDendaToUpdate); 
 
             int rowsAffected = pst.executeUpdate();
             
             if (rowsAffected > 0) {
                 JOptionPane.showMessageDialog(this, "Data denda berhasil diubah!");
-
-                // Perbarui data di tableMode1 secara manual
                 tableMode1.setValueAt(idSewa, row, 1);
                 tableMode1.setValueAt(selectedPenyewaDisplay.substring(selectedPenyewaDisplay.indexOf(" - ") + 3), row, 2); 
                 tableMode1.setValueAt(jenisDenda, row, 3);
-                tableMode1.setValueAt(detailDenda, row, 4); // Update kolom detail_denda di UI
+                tableMode1.setValueAt(detailDenda, row, 4); 
                 tableMode1.setValueAt(jumlahDendaFinal, row, 5);
                 tableMode1.setValueAt(keteranganDenda, row, 6);
 
@@ -694,7 +739,7 @@ public class denda extends javax.swing.JFrame {
             tableMode1.removeRow(row);
 
             JOptionPane.showMessageDialog(null, "Data denda berhasil dihapus!");
-            membersihkan_teks(); // Clear fields after successful deletion
+            membersihkan_teks();
   
             btn_ubah.setEnabled(false);
             btn_hapus.setEnabled(false);
@@ -715,13 +760,12 @@ public class denda extends javax.swing.JFrame {
     private void btn_simpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_simpanActionPerformed
         String selectedPenyewaDisplay = (String) combo_penyewa.getSelectedItem();
         String jenisDenda = (String) combo_jenis.getSelectedItem();
-        String detailDenda = txt_detail_denda.getText(); // Ambil dari field detail denda
-        String keteranganDenda = txt_keterangan.getText(); // Ambil dari field keterangan denda
+        String detailDenda = txt_detail_denda.getText(); 
+        String keteranganDenda = txt_keterangan.getText(); 
 
-        // Validasi input
         if (selectedPenyewaDisplay == null || selectedPenyewaDisplay.equals("--- Pilih Sewa (ID - Nama Pelanggan - Plat) ---") ||
             jenisDenda == null || jenisDenda.equals("Jenis Denda") ||
-            detailDenda.isEmpty() || // Validasi detail denda
+            detailDenda.isEmpty() || 
             keteranganDenda.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Semua field wajib diisi!", "Validasi Input", JOptionPane.WARNING_MESSAGE);
             return;
@@ -729,7 +773,7 @@ public class denda extends javax.swing.JFrame {
         
         double jumlahDendaFinal = 0.0;
         try {
-            jumlahDendaFinal = Double.parseDouble(txt_jumlah_denda.getText()); // Mengambil dari txt_jumlah_denda
+            jumlahDendaFinal = Double.parseDouble(txt_jumlah_denda.getText()); 
             if (jumlahDendaFinal <= 0) {
                  JOptionPane.showMessageDialog(this, "Jumlah denda harus lebih dari 0.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
                  return;
@@ -752,15 +796,14 @@ public class denda extends javax.swing.JFrame {
         try {
             Class.forName(driver);
             kon = DriverManager.getConnection(database, user, pass);
-            
-            // Perbaikan SQL: Insert ke kolom detail_denda
+          
             String SQL = "INSERT INTO denda (id_sewa, jenis_denda, detail_denda, jumlah_denda, keterangan_denda) " +
                          "VALUES (?, ?, ?, ?, ?)";
             
             pst = kon.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
             pst.setInt(1, idSewa);
             pst.setString(2, jenisDenda);
-            pst.setString(3, detailDenda); // Set detail_denda
+            pst.setString(3, detailDenda); 
             pst.setDouble(4, jumlahDendaFinal);
             pst.setString(5, keteranganDenda);
 
@@ -774,17 +817,16 @@ public class denda extends javax.swing.JFrame {
 
             JOptionPane.showMessageDialog(this, "Data denda berhasil disimpan!");
 
-            // Perbarui tabel UI
-            Object[] newRowData = new Object[7]; // Sesuaikan ukuran array
+            Object[] newRowData = new Object[7]; 
             newRowData[0] = generatedIdDenda;
             newRowData[1] = idSewa;
-            newRowData[2] = selectedPenyewaDisplay.substring(selectedPenyewaDisplay.indexOf(" - ") + 3); // Ambil nama saja
+            newRowData[2] = selectedPenyewaDisplay.substring(selectedPenyewaDisplay.indexOf(" - ") + 3); 
             newRowData[3] = jenisDenda;
-            newRowData[4] = detailDenda; // Tambahkan detail_denda ke UI table
+            newRowData[4] = detailDenda; 
             newRowData[5] = jumlahDendaFinal;
             newRowData[6] = keteranganDenda;
             
-            tableMode1.addRow(newRowData); // Tambahkan baris baru ke JTable
+            tableMode1.addRow(newRowData); 
 
             int lastRowIndex = tableMode1.getRowCount() - 1;
             if (lastRowIndex >= 0) {
@@ -854,7 +896,6 @@ public class denda extends javax.swing.JFrame {
     private javax.swing.JButton btn_cari;
     private javax.swing.JButton btn_hapus;
     private javax.swing.JButton btn_simpan;
-    private javax.swing.JButton btn_sort;
     private javax.swing.JButton btn_tambah;
     private javax.swing.JButton btn_tampil_semua;
     private javax.swing.JButton btn_ubah;
