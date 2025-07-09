@@ -8,6 +8,7 @@ package damarent;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import javax.swing.JOptionPane;
@@ -21,7 +22,7 @@ public class denda extends javax.swing.JFrame {
     String driver,database,user,pass;
     Object tabel;
     /**
-     * Creates new form denda
+     * Creates new form 
      */
     public denda() {
         initComponents();
@@ -36,10 +37,6 @@ public class denda extends javax.swing.JFrame {
         loadPenggunaToComboBox();
         tabel_denda.setModel(tableMode1);
         
-        txt_total_denda.setVisible(false);
-        label_total_denda.setVisible(false);
-        txt_total_telat.setVisible(false);
-        label_total_telat.setVisible(false);
         settableload();
             
     }
@@ -56,8 +53,7 @@ public class denda extends javax.swing.JFrame {
                 "ID Sewa",
                 "Nama Penyewa", 
                 "Jenis Denda",
-                "Total Jam Keterlambatan",
-                "Bayar Kerusakan",
+                "Detail Denda",
                 "Jumlah Denda",
                 "Keterangan Denda"
             }
@@ -78,36 +74,50 @@ public class denda extends javax.swing.JFrame {
     
     private void settableload()
     {
-        tableMode1.setRowCount(0); 
+        tableMode1.setRowCount(0); // Kosongkan tabel
+        
         Connection kon = null;
         Statement stt = null;
         ResultSet res = null;
+        
         try {
             Class.forName(driver);
             kon = DriverManager.getConnection(database, user, pass);
             stt = kon.createStatement();
+            
+            // === Kueri SQL yang Direvisi (menambahkan d.detail_denda) ===
             String SQL = "SELECT " +
-                         "    d.id_denda, d.id_sewa, p.nama_pelanggan, d.jenis_denda, " + // Used aliases for clarity
-                         "    COALESCE(d.total_terlambat, 0) AS total_terlambat, " + 
-                         "    COALESCE(d.total_kerusakan, 0) AS total_kerusakan, " +
-                         "    d.jumlah_denda, d.keterangan_denda " +
-                         "FROM denda d " + // Alias denda as 'd'
-                         "JOIN sewa s ON d.id_sewa = s.id_sewa " + // Alias sewa as 's'
-                         "JOIN pelanggan p ON s.id_pelanggan = p.id_pelanggan " + // Alias pelanggan as 'p'
-                         "ORDER BY d.id_denda DESC"; // Use alias in ORDER BY
+                         "    d.id_denda, " +
+                         "    d.id_sewa, " +
+                         "    p.nama_pelanggan, " + // Dari tabel pengguna
+                         "    d.jenis_denda, " +
+                         "    d.detail_denda, " +   // Kolom DETAIL DENDA
+                         "    d.jumlah_denda, " +
+                         "    d.keterangan_denda " + // Keterangan Denda
+                         "FROM " +
+                         "    denda d " + // Alias tabel denda sebagai 'd'
+                         "JOIN " +
+                         "    sewa s ON d.id_sewa = s.id_sewa " + // Alias tabel sewa sebagai 's'
+                         "JOIN " +
+                         "    pelanggan p ON s.id_pelanggan = p.id_pelanggan " + // Alias tabel pengguna sebagai 'p'
+                         "ORDER BY d.id_denda DESC";
+            
             res = stt.executeQuery(SQL);
+            
             while (res.next()) {
-                Object[] data = new Object[8]; 
-                data[0] = res.getString(1);
-                data[1] = res.getString(2);
-                data[2] = res.getString(3); 
-                data[3] = res.getString(4); 
-                data[4] = res.getString(5); 
-                data[5] = res.getString(6); 
-                data[6] = res.getString(7); 
-                data[7] = res.getString(8); 
-                tableMode1.addRow(data);
+                // === SESUAIKAN UKURAN ARRAY DENGAN JUMLAH KOLOM DI SELECT (SEKARANG 7 KOLOM) ===
+                Object[] rowData = new Object[7]; 
+                rowData[0] = res.getInt("id_denda");
+                rowData[1] = res.getInt("id_sewa");
+                rowData[2] = res.getString("nama_pelanggan"); // Nama pelanggan
+                rowData[3] = res.getString("jenis_denda");
+                rowData[4] = res.getString("detail_denda");  // Ambil detail_denda
+                rowData[5] = res.getDouble("jumlah_denda");
+                rowData[6] = res.getString("keterangan_denda"); // Keterangan denda
+                
+                tableMode1.addRow(rowData);
             }
+            
         }
         catch(Exception ex){
             System.err.println(ex.getMessage());
@@ -164,11 +174,11 @@ public class denda extends javax.swing.JFrame {
     
      public void membersihkan_teks() {
         txt_keterangan.setText("");
-        txt_total_denda.setText("");
-        txt_total_telat.setValue(0); 
+        txt_detail_denda.setText(""); // Bersihkan field detail denda
+        txt_jumlah_denda.setText(""); // Bersihkan txt_jumlah_denda
+        
         if (combo_penyewa.getItemCount() > 0) combo_penyewa.setSelectedIndex(0);
         if (combo_jenis.getItemCount() > 0) combo_jenis.setSelectedIndex(0);
-        combo_jenisActionPerformed(null);
     }
     
     int row = -1; 
@@ -176,51 +186,39 @@ public class denda extends javax.swing.JFrame {
     {
         row = tabel_denda.getSelectedRow();
         if (row >= 0) {
+            String idDenda = tableMode1.getValueAt(row, 0).toString();
             String idSewaDisplay = tableMode1.getValueAt(row, 1).toString();
-            String namaPenyewa = tableMode1.getValueAt(row, 2).toString(); 
+            String namaPenyewa = tableMode1.getValueAt(row, 2).toString();
             String jenisDenda = tableMode1.getValueAt(row, 3).toString();
-            String jumlahDendaTelatStr = tableMode1.getValueAt(row, 4).toString(); 
-            String jumlahDendaRusakStr = tableMode1.getValueAt(row, 5).toString(); 
-            String keteranganDenda = tableMode1.getValueAt(row, 7).toString(); // Keterangan Denda
+            String detailDenda = tableMode1.getValueAt(row, 4) != null ? tableMode1.getValueAt(row, 4).toString() : ""; // Ambil Detail Denda
+            Double jumlahDenda = (Double) tableMode1.getValueAt(row, 5); // Ambil Jumlah Denda
+            String keteranganDenda = tableMode1.getValueAt(row, 6) != null ? tableMode1.getValueAt(row, 6).toString() : ""; // Ambil Keterangan Denda
 
+            // Pilih item yang cocok di combo_penyewa
             for (int i = 0; i < combo_penyewa.getItemCount(); i++) {
                 String itemText = (String) combo_penyewa.getItemAt(i);
-                if (itemText.startsWith(idSewaDisplay + " - ")) {
+                // Kita mencari item yang dimulai dengan ID Sewa yang cocok
+                if (itemText.startsWith(idSewaDisplay + " - ")) { 
                     combo_penyewa.setSelectedIndex(i);
                     break;
                 }
             }
 
             combo_jenis.setSelectedItem(jenisDenda);
+            txt_detail_denda.setText(detailDenda); // Isi field detail denda
+            txt_jumlah_denda.setText(String.valueOf(jumlahDenda)); // Isi field jumlah denda
+            txt_keterangan.setText(keteranganDenda); // Isi field keterangan denda
 
-            combo_jenisActionPerformed(null); 
-
-            if (jenisDenda.equals("Terlambat")) {
-                try {
-                    txt_total_telat.setValue(Integer.parseInt(jumlahDendaTelatStr));
-                } catch (NumberFormatException ex) {
-                    txt_total_telat.setValue(0); 
-                }
-                txt_total_denda.setText("");
-            } else if (jenisDenda.equals("Kerusakan")) {
-                try {
-                    txt_total_denda.setText(jumlahDendaRusakStr); 
-                } catch (Exception ex) {
-                    txt_total_denda.setText("0"); 
-                }
-                txt_total_telat.setValue(0);
-            }
-
-            txt_keterangan.setText(keteranganDenda);
-
+            // Atur status tombol
             btn_ubah.setEnabled(true);
             btn_hapus.setEnabled(true);
             btn_simpan.setEnabled(false);
             btn_tambah.setEnabled(true);
         } else {
+            // Jika tidak ada baris terpilih, reset status tombol
             btn_ubah.setEnabled(false);
             btn_hapus.setEnabled(false);
-            btn_simpan.setEnabled(true); 
+            btn_simpan.setEnabled(true);
             btn_tambah.setEnabled(true);
         }
     }
@@ -236,10 +234,8 @@ public class denda extends javax.swing.JFrame {
 
         jSlider1 = new javax.swing.JSlider();
         combo_sort = new javax.swing.JComboBox();
-        txt_keterangan = new javax.swing.JTextField();
-        jLabel5 = new javax.swing.JLabel();
+        txt_detail_denda = new javax.swing.JTextField();
         jSeparator2 = new javax.swing.JSeparator();
-        txt_total_denda = new javax.swing.JTextField();
         btn_tampil_semua = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         combo_jenis = new javax.swing.JComboBox();
@@ -257,14 +253,17 @@ public class denda extends javax.swing.JFrame {
         jSeparator3 = new javax.swing.JSeparator();
         btn_cari = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
-        label_total_denda = new javax.swing.JLabel();
-        label_total_telat = new javax.swing.JLabel();
         btn_tambah = new javax.swing.JButton();
         btn_ubah = new javax.swing.JButton();
         btn_hapus = new javax.swing.JButton();
         btn_batal = new javax.swing.JButton();
         btn_simpan = new javax.swing.JButton();
-        txt_total_telat = new javax.swing.JSpinner();
+        jLabel5 = new javax.swing.JLabel();
+        txt_keterangan = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        jSeparator4 = new javax.swing.JSeparator();
+        txt_jumlah_denda = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -279,9 +278,6 @@ public class denda extends javax.swing.JFrame {
                 combo_sortActionPerformed(evt);
             }
         });
-
-        jLabel5.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jLabel5.setText("Keterangan");
 
         btn_tampil_semua.setText("Tampilkan Semua Data");
         btn_tampil_semua.addActionListener(new java.awt.event.ActionListener() {
@@ -356,11 +352,11 @@ public class denda extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSeparator3, javax.swing.GroupLayout.DEFAULT_SIZE, 1490, Short.MAX_VALUE)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jSeparator3)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(691, 691, 691)
                 .addComponent(jLabel1)
-                .addGap(674, 674, 674))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -368,7 +364,8 @@ public class denda extends javax.swing.JFrame {
                 .addContainerGap(13, Short.MAX_VALUE)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(12, Short.MAX_VALUE))
         );
 
         btn_cari.setText("Cari");
@@ -377,12 +374,6 @@ public class denda extends javax.swing.JFrame {
                 btn_cariActionPerformed(evt);
             }
         });
-
-        label_total_denda.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        label_total_denda.setText("Total Denda");
-
-        label_total_telat.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        label_total_telat.setText("Total Telat");
 
         btn_tambah.setText("Tambah");
         btn_tambah.addActionListener(new java.awt.event.ActionListener() {
@@ -419,60 +410,20 @@ public class denda extends javax.swing.JFrame {
             }
         });
 
+        jLabel5.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabel5.setText("Detail Denda");
+
+        jLabel6.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabel6.setText("Keterangan");
+
+        jLabel7.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabel7.setText("Jumlah Denda");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jSeparator1)
-            .addComponent(jSeparator2)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jLabel8)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txt_cari, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(combo_kategori, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btn_cari, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btn_tampil_semua, javax.swing.GroupLayout.PREFERRED_SIZE, 264, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(34, 34, 34)
-                        .addComponent(jLabel12)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(combo_sort, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btn_sort, javax.swing.GroupLayout.DEFAULT_SIZE, 630, Short.MAX_VALUE)
-                        .addGap(11, 11, 11))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(132, 132, 132)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(combo_penyewa, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(1, 1, 1)
-                                .addComponent(jLabel3)
-                                .addGap(18, 18, 18)
-                                .addComponent(combo_jenis, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(label_total_denda)
-                            .addComponent(label_total_telat))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txt_total_telat, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txt_total_denda, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(106, 106, 106)
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txt_keterangan, javax.swing.GroupLayout.PREFERRED_SIZE, 303, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(121, 121, 121)))
-                .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btn_tambah, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -485,35 +436,75 @@ public class denda extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(btn_batal, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(475, 475, 475))
+            .addComponent(jSeparator1)
+            .addComponent(jSeparator2)
+            .addComponent(jSeparator4)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLabel8)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(txt_cari, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(combo_kategori, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btn_cari, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btn_tampil_semua, javax.swing.GroupLayout.PREFERRED_SIZE, 264, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(34, 34, 34)
+                                .addComponent(jLabel12)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(combo_sort, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btn_sort, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(11, 11, 11)))
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addGap(44, 44, 44)
+                        .addComponent(combo_penyewa, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel3)
+                        .addGap(18, 18, 18)
+                        .addComponent(combo_jenis, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txt_detail_denda, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(41, 41, 41)
+                        .addComponent(jLabel7)
+                        .addGap(18, 18, 18)
+                        .addComponent(txt_jumlah_denda, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txt_keterangan, javax.swing.GroupLayout.PREFERRED_SIZE, 372, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(17, 17, 17))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txt_keterangan, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jLabel2)
-                                    .addComponent(combo_penyewa, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(combo_jenis, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(42, 42, 42)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(label_total_telat)
-                                    .addComponent(txt_total_telat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(txt_total_denda, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(label_total_denda)))
-                        .addGap(0, 2, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel2)
+                        .addComponent(combo_penyewa, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(combo_jenis, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
+                        .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txt_detail_denda)
+                        .addComponent(jLabel7)
+                        .addComponent(txt_jumlah_denda, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txt_keterangan)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -530,8 +521,10 @@ public class denda extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 383, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 476, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btn_tambah, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btn_simpan, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -543,7 +536,7 @@ public class denda extends javax.swing.JFrame {
 
         layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {combo_jenis, combo_penyewa});
 
-        layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {label_total_denda, label_total_telat, txt_total_denda, txt_total_telat});
+        layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {txt_detail_denda, txt_jumlah_denda});
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -579,30 +572,7 @@ public class denda extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowClosed
 
     private void combo_jenisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_combo_jenisActionPerformed
-        // TODO add your handling code here:
-        String jenisDenda = (String) combo_jenis.getSelectedItem();
-        
-        if (jenisDenda == "Terlambat") {
-            txt_total_denda.setVisible(false);
-            label_total_denda.setVisible(false);
-            
-            txt_total_telat.setVisible(true);
-            label_total_telat.setVisible(true);
-        }
-        else if (jenisDenda == "Kerusakan") {
-            txt_total_telat.setVisible(false);
-            label_total_telat.setVisible(false);
-            
-            txt_total_denda.setVisible(true);
-            label_total_denda.setVisible(true);
-        }
-        else {
-            txt_total_telat.setVisible(false);
-            label_total_telat.setVisible(false);
-            
-            txt_total_denda.setVisible(false);
-            label_total_denda.setVisible(false);
-        }
+      
     }//GEN-LAST:event_combo_jenisActionPerformed
 
     private void btn_tambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_tambahActionPerformed
@@ -612,101 +582,89 @@ public class denda extends javax.swing.JFrame {
 
     private void btn_ubahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_ubahActionPerformed
         if (row < 0) {
-            JOptionPane.showMessageDialog(null, "Pilih data denda yang akan diubah dari tabel.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Pilih data denda yang akan diubah dari tabel.", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         String idDendaToUpdate = tableMode1.getValueAt(row, 0).toString();
 
-        String selectedPenyewa = (String) combo_penyewa.getSelectedItem();
+        String selectedPenyewaDisplay = (String) combo_penyewa.getSelectedItem();
         String jenisDenda = (String) combo_jenis.getSelectedItem();
-        String keteranganDenda = txt_keterangan.getText();
+        String detailDenda = txt_detail_denda.getText(); // Ambil dari field detail denda
+        String keteranganDenda = txt_keterangan.getText(); // Ambil dari field keterangan denda
+
+        if (selectedPenyewaDisplay == null || selectedPenyewaDisplay.equals("--- Pilih Sewa (ID - Nama Pelanggan - Plat) ---") ||
+            jenisDenda == null || jenisDenda.equals("Jenis Denda") ||
+            detailDenda.isEmpty() || // Validasi detail denda
+            keteranganDenda.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Semua field wajib diisi!", "Validasi Input", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
         double jumlahDendaFinal = 0.0;
-        double totalTerlambat = 0.0;
-        double totalKerusakan = 0.0;
-
-        if (jenisDenda != null && jenisDenda == "Terlambat") {
-            Object telatValue = txt_total_telat.getValue();
-            if (telatValue == null || (Integer)telatValue <= 0) {
-                JOptionPane.showMessageDialog(null, "Jumlah denda terlambat harus diisi dengan angka lebih dari 0.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
-                return;
+        try {
+            jumlahDendaFinal = Double.parseDouble(txt_jumlah_denda.getText()); // Mengambil dari txt_jumlah_denda
+            if (jumlahDendaFinal <= 0) {
+                 JOptionPane.showMessageDialog(this, "Jumlah denda harus lebih dari 0.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
+                 return;
             }
-            totalTerlambat = ((Integer) telatValue).doubleValue();
-            jumlahDendaFinal = totalTerlambat;
-            totalKerusakan = 0.0;
-        } else if (jenisDenda != null && jenisDenda == "Kerusakan") {
-            String jumlahKerusakan = txt_total_denda.getText(); 
-            if (jumlahKerusakan.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Jumlah denda kerusakan tidak boleh kosong.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            try {
-                totalKerusakan = Double.parseDouble(jumlahKerusakan);
-                if (totalKerusakan <= 0) {
-                     JOptionPane.showMessageDialog(null, "Jumlah denda kerusakan harus lebih dari 0.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
-                     return;
-                }
-                jumlahDendaFinal = totalKerusakan; 
-                totalTerlambat = 0.0; 
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(null, "Jumlah denda kerusakan tidak valid (not a number).", "Error Input", JOptionPane.ERROR_MESSAGE);
-                txt_total_denda.requestFocus();
-                return;
-            }
-        } else {
-            JOptionPane.showMessageDialog(null, "Pilih jenis denda terlebih dahulu.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Jumlah denda tidak valid (bukan angka).", "Error Input", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        Integer idSewa = penggunaMap.get(selectedPenyewa);
+        Integer idSewa = penggunaMap.get(selectedPenyewaDisplay);
         if (idSewa == null || idSewa == 0) {
-            JOptionPane.showMessageDialog(null, "Pilih penyewa yang valid dari daftar.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Pilih Sewa yang valid dari daftar.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
+        Connection kon = null;
+        PreparedStatement pst = null; // Gunakan PreparedStatement untuk keamanan
+        
         try {
             Class.forName(driver);
-            Connection kon = DriverManager.getConnection(database, user, pass);
-            Statement stt = kon.createStatement();
-
+            kon = DriverManager.getConnection(database, user, pass);
+            
             String SQL = "UPDATE denda SET "
-                       + "id_sewa = " + idSewa + ", " 
-                       + "jenis_denda = '" + jenisDenda + "', "
-                       + "total_terlambat = " + (totalTerlambat > 0 ? totalTerlambat : "NULL") + ", "
-                       + "total_kerusakan = " + (totalKerusakan > 0 ? totalKerusakan : "NULL") + ", "
-                       + "jumlah_denda = " + jumlahDendaFinal + ", "
-                       + "keterangan_denda = '" + keteranganDenda + "' "
-                       + "WHERE id_denda = '" + idDendaToUpdate + "'";
+                       + "id_sewa = ?, "
+                       + "jenis_denda = ?, "
+                       + "detail_denda = ?, " // Update kolom detail_denda
+                       + "jumlah_denda = ?, " 
+                       + "keterangan_denda = ? " 
+                       + "WHERE id_denda = ?";
 
-            stt.executeUpdate(SQL); 
-            JOptionPane.showMessageDialog(null, "Data denda berhasil diubah!");
+            pst = kon.prepareStatement(SQL);
+            pst.setInt(1, idSewa);
+            pst.setString(2, jenisDenda);
+            pst.setString(3, detailDenda); // Set detail_denda
+            pst.setDouble(4, jumlahDendaFinal);
+            pst.setString(5, keteranganDenda);
+            pst.setString(6, idDendaToUpdate); // Kondisi WHERE
 
-            String namaPenyewaDiperbarui = "";
-            for (java.util.Map.Entry<String, Integer> entry : penggunaMap.entrySet()) {
-                if (entry.getValue().equals(idSewa)) {
-                    namaPenyewaDiperbarui = entry.getKey().substring(entry.getKey().indexOf(" - ") + 3);
-                    break;
-                }
+            int rowsAffected = pst.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                JOptionPane.showMessageDialog(this, "Data denda berhasil diubah!");
+
+                // Perbarui data di tableMode1 secara manual
+                tableMode1.setValueAt(idSewa, row, 1);
+                tableMode1.setValueAt(selectedPenyewaDisplay.substring(selectedPenyewaDisplay.indexOf(" - ") + 3), row, 2); 
+                tableMode1.setValueAt(jenisDenda, row, 3);
+                tableMode1.setValueAt(detailDenda, row, 4); // Update kolom detail_denda di UI
+                tableMode1.setValueAt(jumlahDendaFinal, row, 5);
+                tableMode1.setValueAt(keteranganDenda, row, 6);
+
+                membersihkan_teks(); 
+                btn_ubah.setEnabled(false);
+                btn_hapus.setEnabled(false);
+                btn_simpan.setEnabled(true);
+                btn_tambah.setEnabled(true);
+            } else {
+                JOptionPane.showMessageDialog(this, "Gagal mengubah data denda. Data tidak ditemukan atau tidak ada perubahan.", "Error", JOptionPane.ERROR_MESSAGE);
             }
-            tableMode1.setValueAt(idSewa.toString(), row, 1);
-            tableMode1.setValueAt(namaPenyewaDiperbarui, row, 2);
-            tableMode1.setValueAt(jenisDenda, row, 3);
-            tableMode1.setValueAt((totalTerlambat > 0 ? totalTerlambat : ""), row, 4); 
-            tableMode1.setValueAt((totalKerusakan > 0 ? totalKerusakan : ""), row, 5); 
-            tableMode1.setValueAt(jumlahDendaFinal, row, 6);
-            tableMode1.setValueAt(keteranganDenda, row, 7);
-
-            btn_ubah.setEnabled(false);
-            btn_hapus.setEnabled(false);
-            btn_simpan.setEnabled(true); 
-            btn_tambah.setEnabled(true); 
             
-            membersihkan_teks();
-            
-        }
-        catch (Exception ex)
-        {
+        }catch (Exception ex){
             System.err.println(ex.getMessage());
         }
         
@@ -755,118 +713,78 @@ public class denda extends javax.swing.JFrame {
     }//GEN-LAST:event_btn_batalActionPerformed
 
     private void btn_simpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_simpanActionPerformed
-        String selectedPenyewa = (String) combo_penyewa.getSelectedItem();
+        String selectedPenyewaDisplay = (String) combo_penyewa.getSelectedItem();
         String jenisDenda = (String) combo_jenis.getSelectedItem();
-        String keteranganDenda = txt_keterangan.getText();
+        String detailDenda = txt_detail_denda.getText(); // Ambil dari field detail denda
+        String keteranganDenda = txt_keterangan.getText(); // Ambil dari field keterangan denda
+
+        // Validasi input
+        if (selectedPenyewaDisplay == null || selectedPenyewaDisplay.equals("--- Pilih Sewa (ID - Nama Pelanggan - Plat) ---") ||
+            jenisDenda == null || jenisDenda.equals("Jenis Denda") ||
+            detailDenda.isEmpty() || // Validasi detail denda
+            keteranganDenda.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Semua field wajib diisi!", "Validasi Input", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         
         double jumlahDendaFinal = 0.0;
-        int totalTerlambat = 0;
-        double totalKerusakan = 0.0;
-
-        if (selectedPenyewa == null || selectedPenyewa.equals("Pilih Penyewa") || 
-            jenisDenda == null || jenisDenda.equals("Jenis Denda") || 
-            keteranganDenda.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Semua field wajib diisi!", "Validasi Input", JOptionPane.WARNING_MESSAGE);
+        try {
+            jumlahDendaFinal = Double.parseDouble(txt_jumlah_denda.getText()); // Mengambil dari txt_jumlah_denda
+            if (jumlahDendaFinal <= 0) {
+                 JOptionPane.showMessageDialog(this, "Jumlah denda harus lebih dari 0.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
+                 return;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Jumlah denda tidak valid (bukan angka).", "Error Input", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        if (jenisDenda.equals("Terlambat")) {
-            Object telatValue = txt_total_telat.getValue();
-            if (telatValue == null || !(telatValue instanceof Integer) || ((Integer)telatValue) <= 0) {
-                JOptionPane.showMessageDialog(null, "Jumlah denda terlambat harus diisi dengan angka bulat lebih dari 0.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            totalTerlambat = ((Integer) telatValue);
-            jumlahDendaFinal = totalTerlambat; 
-            totalKerusakan = 0.0; 
-        } else if (jenisDenda.equals("Kerusakan")) {
-            String kerusakanStr = txt_total_denda.getText();
-            if (kerusakanStr.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Jumlah denda kerusakan tidak boleh kosong.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            try {
-                totalKerusakan = Double.parseDouble(kerusakanStr);
-                if (totalKerusakan <= 0) {
-                     JOptionPane.showMessageDialog(null, "Jumlah denda kerusakan harus lebih dari 0.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
-                     return;
-                }
-                jumlahDendaFinal = totalKerusakan;
-                totalTerlambat = 0; 
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(null, "Jumlah denda kerusakan tidak valid (bukan angka).", "Error Input", JOptionPane.ERROR_MESSAGE);
-                txt_total_denda.requestFocus();
-                return;
-            }
-        } else {
-            JOptionPane.showMessageDialog(null, "Pilih jenis denda yang valid.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        if (!penggunaMap.containsKey(selectedPenyewa)) {
-            JOptionPane.showMessageDialog(null, "Penyewa tidak ditemukan dalam daftar. Pilih penyewa dari combo box yang tersedia.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        Integer idSewa = penggunaMap.get(selectedPenyewa);
+        Integer idSewa = penggunaMap.get(selectedPenyewaDisplay);
         if (idSewa == null || idSewa == 0) {
-            JOptionPane.showMessageDialog(null, "ID Sewa tidak valid. Silahkan pilih penyewa yang benar.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "ID Sewa tidak valid. Silahkan pilih penyewa yang benar.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         Connection kon = null;
-        Statement stt = null;
+        PreparedStatement pst = null;
         ResultSet rs = null;
 
         try {
             Class.forName(driver);
             kon = DriverManager.getConnection(database, user, pass);
-            stt = kon.createStatement();
+            
+            // Perbaikan SQL: Insert ke kolom detail_denda
+            String SQL = "INSERT INTO denda (id_sewa, jenis_denda, detail_denda, jumlah_denda, keterangan_denda) " +
+                         "VALUES (?, ?, ?, ?, ?)";
+            
+            pst = kon.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
+            pst.setInt(1, idSewa);
+            pst.setString(2, jenisDenda);
+            pst.setString(3, detailDenda); // Set detail_denda
+            pst.setDouble(4, jumlahDendaFinal);
+            pst.setString(5, keteranganDenda);
 
-            String SQL = "INSERT INTO denda (id_sewa, jenis_denda, total_terlambat, total_kerusakan, jumlah_denda, keterangan_denda) " +
-                         "VALUES (" + idSewa + ", " + 
-                         "'" + jenisDenda + "', " +
-                         totalTerlambat + ", " +    
-                         totalKerusakan + ", " +     
-                         jumlahDendaFinal + ", " +  
-                         "'" + keteranganDenda + "')";
-
-            stt.executeUpdate(SQL, Statement.RETURN_GENERATED_KEYS);
-            rs = stt.getGeneratedKeys();
+            pst.executeUpdate(); 
+            rs = pst.getGeneratedKeys(); 
 
             String generatedIdDenda = null;
             if (rs.next()) {
                 generatedIdDenda = rs.getString(1); 
             }
 
-            JOptionPane.showMessageDialog(null, "Data denda berhasil disimpan!");
+            JOptionPane.showMessageDialog(this, "Data denda berhasil disimpan!");
 
-            String namaPelangganTersimpan = "";
-            if (idSewa != 0) { 
-                 for (java.util.Map.Entry<String, Integer> entry : penggunaMap.entrySet()) {
-                    if (entry.getValue().equals(idSewa)) {
-                        int dashIndex = entry.getKey().indexOf(" - ");
-                        if (dashIndex != -1) {
-                            namaPelangganTersimpan = entry.getKey().substring(dashIndex + 3);
-                        } else {
-                             namaPelangganTersimpan = entry.getKey();
-                        }
-                        break;
-                    }
-                }
-            }
-
-
-            Object[] newRowData = new Object[8];
+            // Perbarui tabel UI
+            Object[] newRowData = new Object[7]; // Sesuaikan ukuran array
             newRowData[0] = generatedIdDenda;
-            newRowData[1] = idSewa; 
-            newRowData[2] = namaPelangganTersimpan; 
+            newRowData[1] = idSewa;
+            newRowData[2] = selectedPenyewaDisplay.substring(selectedPenyewaDisplay.indexOf(" - ") + 3); // Ambil nama saja
             newRowData[3] = jenisDenda;
-            newRowData[4] = (totalTerlambat > 0 ? totalTerlambat : ""); 
-            newRowData[5] = (totalKerusakan > 0 ? totalKerusakan : ""); 
-            newRowData[6] = jumlahDendaFinal;
-            newRowData[7] = keteranganDenda;
+            newRowData[4] = detailDenda; // Tambahkan detail_denda ke UI table
+            newRowData[5] = jumlahDendaFinal;
+            newRowData[6] = keteranganDenda;
             
-            tableMode1.addRow(newRowData);
+            tableMode1.addRow(newRowData); // Tambahkan baris baru ke JTable
 
             int lastRowIndex = tableMode1.getRowCount() - 1;
             if (lastRowIndex >= 0) {
@@ -875,13 +793,12 @@ public class denda extends javax.swing.JFrame {
             }
             
             membersihkan_teks();
-            btn_simpan.setEnabled(true); 
-            btn_ubah.setEnabled(false);   
+            btn_simpan.setEnabled(true);
+            btn_ubah.setEnabled(false);
             btn_hapus.setEnabled(false);
+            btn_batal.setEnabled(false);
             
-        }
-        catch (Exception ex)
-        {
+        }catch (Exception ex){
             JOptionPane.showMessageDialog(null,
                 ex.getMessage(),"error",
                 JOptionPane.INFORMATION_MESSAGE);
@@ -950,19 +867,20 @@ public class denda extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
+    private javax.swing.JSeparator jSeparator4;
     private javax.swing.JSlider jSlider1;
-    private javax.swing.JLabel label_total_denda;
-    private javax.swing.JLabel label_total_telat;
     private javax.swing.JTable tabel_denda;
     private javax.swing.JTextField txt_cari;
+    private javax.swing.JTextField txt_detail_denda;
+    private javax.swing.JTextField txt_jumlah_denda;
     private javax.swing.JTextField txt_keterangan;
-    private javax.swing.JTextField txt_total_denda;
-    private javax.swing.JSpinner txt_total_telat;
     // End of variables declaration//GEN-END:variables
 }

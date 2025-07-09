@@ -174,8 +174,7 @@ public class selesai extends javax.swing.JFrame {
         }
     }
     
-    int row = -1;
-     private void aktifkan_teks() {
+    private void aktifkan_teks() {
         combo_penyewa.setEnabled(true);
         combo_kondisi.setEnabled(true);
         tanggal_dikembalikan.setEnabled(true);
@@ -195,7 +194,7 @@ public class selesai extends javax.swing.JFrame {
         combo_penyewa1.setEnabled(false);
     }
     
-    private void clear_teks() {
+    private void membersihkan_teks() {
         combo_penyewa.setSelectedIndex(0); 
         tanggal_dikembalikan.setDate(new Date()); 
         jam_dikembalikan.setValue(Calendar.getInstance().get(Calendar.HOUR_OF_DAY));
@@ -206,6 +205,78 @@ public class selesai extends javax.swing.JFrame {
         txt_tanggal_kembali_seharusnya.setText(""); // Reset field tanggal seharusnya
         txt_jumlah_harus_dibayarkan.setText("0.0"); // Reset field jumlah harus dibayarkan
         combo_penyewa1.setSelectedIndex(0);
+    }
+    
+    int row = -1; // Deklarasi row di sini
+     public void tampil_field() {
+        row = table_selesai.getSelectedRow();
+        if (row >= 0) { // Pastikan indeks baris valid
+            // Ambil ID Sewa dari tabel
+            // Indeks kolom sesuai dengan getDefaultTabelModel()
+            String idSewaFromTable = tableMode1.getValueAt(row, 1).toString(); // Kolom ID Sewa (indeks 1)
+            
+            // Cari item yang cocok di combo_penyewa
+            for (int i = 0; i < combo_penyewa.getItemCount(); i++) {
+                String itemText = (String) combo_penyewa.getItemAt(i);
+                if (itemText.startsWith(idSewaFromTable + " - ")) { // Pastikan format match: "ID Sewa - Nama Pelanggan (Plat Nomor)"
+                    combo_penyewa.setSelectedIndex(i);
+                    break;
+                }
+            }
+
+            // Ambil data lainnya dari baris tabel dan tampilkan di field input
+            // SESUAIKAN INDEKS KOLOM DENGAN getDefaultTabelModel() ANDA!
+            txt_jumlah_dibayarkan.setText(tableMode1.getValueAt(row, 11).toString()); // Jml Dibayar (indeks 11)
+            txt_jumlahdenda1.setText(tableMode1.getValueAt(row, 9).toString()); // Total Denda (indeks 9)
+            txt_jumlah_harus_dibayarkan.setText(tableMode1.getValueAt(row, 10).toString()); // Total Biaya Akhir (indeks 10)
+
+            // Tanggal Kembali Aktual
+            Timestamp tglKembaliAktualTs = (Timestamp) tableMode1.getValueAt(row, 7); // Tgl Kembali Aktual (indeks 7)
+            if (tglKembaliAktualTs != null) {
+                tanggal_dikembalikan.setDate(new Date(tglKembaliAktualTs.getTime()));
+                Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis(tglKembaliAktualTs.getTime());
+                jam_dikembalikan.setValue(cal.get(Calendar.HOUR_OF_DAY));
+                menit_dikembalikan.setValue(cal.get(Calendar.MINUTE));
+            } else {
+                tanggal_dikembalikan.setDate(null);
+                jam_dikembalikan.setValue(0);
+                menit_dikembalikan.setValue(0);
+            }
+
+            // Kondisi Motor
+            String kondisi = tableMode1.getValueAt(row, 8).toString(); // Kondisi Motor (indeks 8)
+            combo_kondisi.setSelectedItem(kondisi);
+
+            // Tanggal Kembali Rencana (Tgl Target Kembali)
+            Timestamp tglKembaliRencanaTs = (Timestamp) tableMode1.getValueAt(row, 6); // Tgl Target Kembali (indeks 6)
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy HH:mm"); // Format yang lebih lengkap
+            if (tglKembaliRencanaTs != null) {
+                txt_tanggal_kembali_seharusnya.setText(dateFormat.format(tglKembaliRencanaTs));
+            } else {
+                txt_tanggal_kembali_seharusnya.setText("N/A");
+            }
+            
+            // Setelah mengisi field, panggil updateCalculatedFields() untuk memastikan
+            // total denda dan total biaya akhir dihitung ulang berdasarkan data yang ditampilkan.
+            // Ini penting karena denda progresif dan denda kerusakan dihitung di sini
+            // updateCalculatedFields(); // Mungkin tidak perlu dipanggil di sini jika data sudah lengkap dari tabel
+
+            // Aktifkan tombol Ubah dan Hapus
+            aktifkan_teks();
+            btn_ubah.setEnabled(true);
+            btn_hapus.setEnabled(true);
+            btn_simpan.setEnabled(false); // Tidak bisa simpan jika mode ubah/hapus
+            btn_batal.setEnabled(true);
+        } else {
+            // Jika tidak ada baris terpilih, reset form
+            membersihkan_teks();
+            nonaktif_teks();
+            btn_ubah.setEnabled(false);
+            btn_hapus.setEnabled(false);
+            btn_simpan.setEnabled(true);
+            btn_batal.setEnabled(false);
+        }
     }
     
     private void loadPenyewaToComboBox() {
@@ -463,6 +534,14 @@ public class selesai extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        table_selesai.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                table_selesaiMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                table_selesaiMouseEntered(evt);
+            }
+        });
         jScrollPane1.setViewportView(table_selesai);
 
         btn_tambah.setText("Tambah");
@@ -794,6 +873,168 @@ public class selesai extends javax.swing.JFrame {
 
     private void btn_ubahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_ubahActionPerformed
         // TODO add your handling code here:
+        if (row < 0) {
+        JOptionPane.showMessageDialog(this, "Pilih data transaksi selesai yang akan diubah dari tabel.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    // 2. Ambil ID kunci dari baris yang dipilih
+    String idSelesaiToUpdate = tableMode1.getValueAt(row, 0).toString();
+    int idSewaTerkait = Integer.parseInt(tableMode1.getValueAt(row, 1).toString());
+
+    // 3. Ambil data terbaru dari semua komponen input di form
+    Date tglKembaliDate = tanggal_dikembalikan.getDate();
+    if (tglKembaliDate == null) {
+        JOptionPane.showMessageDialog(this, "Tanggal kembali aktual harus diisi.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    int jam = (Integer) jam_dikembalikan.getValue();
+    int menit = (Integer) menit_dikembalikan.getValue();
+
+    // Buat timestamp dari tanggal & jam aktual yang baru
+    Calendar calAktual = Calendar.getInstance();
+    calAktual.setTime(tglKembaliDate);
+    calAktual.set(Calendar.HOUR_OF_DAY, jam);
+    calAktual.set(Calendar.MINUTE, menit);
+    calAktual.set(Calendar.SECOND, 0);
+    calAktual.set(Calendar.MILLISECOND, 0);
+    Timestamp tanggalKembaliAktual = new Timestamp(calAktual.getTimeInMillis());
+
+    String kondisiMotor = (String) combo_kondisi.getSelectedItem();
+    if (kondisiMotor == null || kondisiMotor.equals("--- Pilih Kondisi ---")) {
+        JOptionPane.showMessageDialog(this, "Kondisi motor harus dipilih.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    
+    double jumlahDibayar = 0.0;
+    try {
+        jumlahDibayar = Double.parseDouble(txt_jumlah_dibayarkan.getText());
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Format Jumlah Dibayarkan tidak valid.", "Error Input", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+    
+    String metodePembayaran = (String) combo_penyewa1.getSelectedItem();
+     if (metodePembayaran == null || metodePembayaran.trim().isEmpty() || metodePembayaran.equals("--- Pilih Metode ---")) {
+        JOptionPane.showMessageDialog(this, "Metode pembayaran harus dipilih.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    // 4. Hitung ulang semua biaya berdasarkan input baru
+    double biayaSewaAwal = 0;
+    Timestamp tanggalTargetKembali = null;
+    try (Connection kon = DriverManager.getConnection(database, user, pass);
+         PreparedStatement pstSewa = kon.prepareStatement("SELECT harga_sewa_awal, tanggal_kembali FROM sewa WHERE id_sewa = ?")) {
+        pstSewa.setInt(1, idSewaTerkait);
+        ResultSet rsSewa = pstSewa.executeQuery();
+        if (rsSewa.next()) {
+            biayaSewaAwal = rsSewa.getDouble("harga_sewa_awal");
+            tanggalTargetKembali = rsSewa.getTimestamp("tanggal_kembali");
+        } else {
+             JOptionPane.showMessageDialog(this, "Data sewa terkait tidak ditemukan, tidak dapat menghitung ulang biaya.", "Error", JOptionPane.ERROR_MESSAGE);
+             return;
+        }
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error mengambil data sewa: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    double dendaTelatFinal = hitungDendaTelat(tanggalTargetKembali, tglKembaliDate, jam, menit, biayaSewaAwal);
+    double dendaKerusakanFinal = 0.0;
+    if (kondisiMotor != null) {
+        switch (kondisiMotor) {
+            case "Lecet": dendaKerusakanFinal = 50000.0; break;
+            case "Rusak Ringan": dendaKerusakanFinal = 200000.0; break;
+            case "Rusak Berat": dendaKerusakanFinal = 1000000.0; break;
+            default: dendaKerusakanFinal = 0.0; break;
+        }
+    }
+    double totalDendaFinal = dendaTelatFinal + dendaKerusakanFinal;
+    double totalBiayaAkhirFinal = biayaSewaAwal + totalDendaFinal;
+
+    String statusPembayaran = "";
+    if (jumlahDibayar >= totalBiayaAkhirFinal) {
+        statusPembayaran = "Lunas";
+    } else if (jumlahDibayar > 0 && jumlahDibayar < totalBiayaAkhirFinal) {
+        statusPembayaran = "Kurang Bayar";
+    } else {
+        statusPembayaran = "Belum Bayar";
+    }
+
+    // 5. Jalankan proses UPDATE dalam sebuah transaksi
+    Connection kon = null;
+    try {
+        kon = DriverManager.getConnection(database, user, pass);
+        kon.setAutoCommit(false); // Mulai transaksi
+
+        // Langkah A: Hapus semua denda lama yang terkait dengan id_sewa ini
+        try (PreparedStatement pstDeleteDenda = kon.prepareStatement("DELETE FROM denda WHERE id_sewa = ?")) {
+            pstDeleteDenda.setInt(1, idSewaTerkait);
+            pstDeleteDenda.executeUpdate();
+        }
+
+        // Langkah B: Masukkan kembali denda baru (jika ada)
+        if (dendaTelatFinal > 0) {
+            String sqlDendaTelat = "INSERT INTO denda (id_sewa, jenis_denda, detail_denda, jumlah_denda, keterangan_denda) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement pstInsertDenda = kon.prepareStatement(sqlDendaTelat)) {
+                long diffMillis = tanggalKembaliAktual.getTime() - tanggalTargetKembali.getTime();
+                long diffHours = (long) Math.ceil((double) diffMillis / (1000 * 60 * 60));
+                pstInsertDenda.setInt(1, idSewaTerkait);
+                pstInsertDenda.setString(2, "Terlambat");
+                pstInsertDenda.setString(3, diffHours + " jam");
+                pstInsertDenda.setDouble(4, dendaTelatFinal);
+                pstInsertDenda.setString(5, "Denda keterlambatan pengembalian motor.");
+                pstInsertDenda.executeUpdate();
+            }
+        }
+        if (dendaKerusakanFinal > 0) {
+             String sqlDendaKerusakan = "INSERT INTO denda (id_sewa, jenis_denda, detail_denda, jumlah_denda, keterangan_denda) VALUES (?, ?, ?, ?, ?)";
+             try (PreparedStatement pstInsertDenda = kon.prepareStatement(sqlDendaKerusakan)) {
+                pstInsertDenda.setInt(1, idSewaTerkait);
+                pstInsertDenda.setString(2, "Kerusakan");
+                pstInsertDenda.setString(3, kondisiMotor);
+                pstInsertDenda.setDouble(4, dendaKerusakanFinal);
+                pstInsertDenda.setString(5, "Denda kerusakan motor: " + kondisiMotor);
+                pstInsertDenda.executeUpdate();
+            }
+        }
+        
+        // Langkah C: Update tabel 'selesai' dengan semua data yang baru
+        String sqlUpdateSelesai = "UPDATE selesai SET tanggal_kembali_aktual = ?, kondisi_motor_kembali = ?, total_denda = ?, total_biaya = ?, jumlah_sudah_dibayar = ?, status_pembayaran = ?, metode_pembayaran = ? WHERE id_selesai = ?";
+        try (PreparedStatement pstUpdateSelesai = kon.prepareStatement(sqlUpdateSelesai)) {
+            pstUpdateSelesai.setTimestamp(1, tanggalKembaliAktual);
+            pstUpdateSelesai.setString(2, kondisiMotor);
+            pstUpdateSelesai.setDouble(3, totalDendaFinal);
+            pstUpdateSelesai.setDouble(4, totalBiayaAkhirFinal);
+            pstUpdateSelesai.setDouble(5, jumlahDibayar);
+            pstUpdateSelesai.setString(6, statusPembayaran);
+            pstUpdateSelesai.setString(7, metodePembayaran);
+            pstUpdateSelesai.setString(8, idSelesaiToUpdate);
+            
+            int rowsUpdated = pstUpdateSelesai.executeUpdate();
+            if (rowsUpdated > 0) {
+                 kon.commit(); // Commit transaksi jika semua berhasil
+                 JOptionPane.showMessageDialog(this, "Data transaksi selesai berhasil diubah!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                 membersihkan_teks();
+                 nonaktif_teks();
+                 btn_ubah.setEnabled(false);
+                 btn_hapus.setEnabled(false);
+                 btn_batal.setEnabled(false);
+                 btn_simpan.setEnabled(true);
+                 settableload(); // Muat ulang tabel
+            } else {
+                kon.rollback();
+                JOptionPane.showMessageDialog(this, "Gagal mengubah data transaksi selesai. Data tidak ditemukan.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }catch (Exception ex)
+        {
+            System.err.println(ex.getMessage());
+        }
+    }catch (Exception ex)
+        {
+            System.err.println(ex.getMessage());
+        }
     }//GEN-LAST:event_btn_ubahActionPerformed
 
     private void btn_batalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_batalActionPerformed
@@ -829,20 +1070,20 @@ public class selesai extends javax.swing.JFrame {
         calAktual.set(Calendar.MILLISECOND, 0);
         Timestamp tanggalKembaliAktual = new Timestamp(calAktual.getTimeInMillis());
 
-        String kondisiMotor = (String) combo_kondisi.getSelectedItem();
+        String kondisiMotor = (String) combo_kondisi.getSelectedItem(); // Gunakan combo_kondisi
         if (kondisiMotor == null || kondisiMotor.equals("--- Pilih Kondisi ---")) {
-             JOptionPane.showMessageDialog(this, "Kondisi motor harus dipilih.", "Peringatan", JOptionPane.WARNING_MESSAGE);
-             return;
+            JOptionPane.showMessageDialog(this, "Kondisi motor harus dipilih.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
         }
-        
+
         double jumlahDibayar = 0.0;
         try {
-            jumlahDibayar = Double.parseDouble(txt_jumlah_dibayarkan.getText()); 
+            jumlahDibayar = Double.parseDouble(txt_jumlah_dibayarkan.getText());
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Format Jumlah Dibayarkan tidak valid.", "Error Input", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
+
         String metodePembayaran = (String) combo_penyewa1.getSelectedItem();
         if (metodePembayaran == null || metodePembayaran.equals("--- Pilih Metode ---") || metodePembayaran.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Metode pembayaran harus dipilih.", "Peringatan", JOptionPane.WARNING_MESSAGE);
@@ -850,11 +1091,11 @@ public class selesai extends javax.swing.JFrame {
         }
 
         // --- RE-CALCULATE Denda dan Total Biaya Akhir TEPAT SEBELUM INSERT ---
-        double biayaSewaAwal = sewaBiayaAwalMap.get(idSewa); 
+        double biayaSewaAwal = sewaBiayaAwalMap.get(idSewa);
         Timestamp tanggalTargetKembali = sewaTargetKembaliMap.get(idSewa);
 
         double dendaTelatFinal = hitungDendaTelat(tanggalTargetKembali, tglKembaliDate, jam, menit, biayaSewaAwal);
-        
+
         double dendaKerusakanFinal = 0.0;
         if (kondisiMotor != null) {
             switch (kondisiMotor) {
@@ -864,9 +1105,9 @@ public class selesai extends javax.swing.JFrame {
                 default: dendaKerusakanFinal = 0.0; break;
             }
         }
-        
+
         double totalDendaFinal = dendaTelatFinal + dendaKerusakanFinal;
-        double totalBiayaAkhirFinal = biayaSewaAwal + totalDendaFinal; // Ini yang akan dimasukkan ke DB
+        double totalBiayaAkhirFinal = biayaSewaAwal + totalDendaFinal;
 
         String statusPembayaran = "";
         if (jumlahDibayar >= totalBiayaAkhirFinal) {
@@ -886,17 +1127,17 @@ public class selesai extends javax.swing.JFrame {
         try {
             Class.forName(driver);
             kon = DriverManager.getConnection(database, user, pass);
-            kon.setAutoCommit(false);
+            kon.setAutoCommit(false); // Mulai transaksi
 
             // INSERT ke tabel 'selesai'
             String SQL_INSERT_SELESAI = "INSERT INTO selesai (id_sewa, tanggal_kembali_aktual, kondisi_motor_kembali, total_denda, total_biaya, jumlah_sudah_dibayar, status_pembayaran, metode_pembayaran) " +
-                                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             psInsertSelesai = kon.prepareStatement(SQL_INSERT_SELESAI);
             psInsertSelesai.setInt(1, idSewa);
             psInsertSelesai.setTimestamp(2, tanggalKembaliAktual);
             psInsertSelesai.setString(3, kondisiMotor);
-            psInsertSelesai.setDouble(4, totalDendaFinal);      
-            psInsertSelesai.setDouble(5, totalBiayaAkhirFinal); 
+            psInsertSelesai.setDouble(4, totalDendaFinal);
+            psInsertSelesai.setDouble(5, totalBiayaAkhirFinal);
             psInsertSelesai.setDouble(6, jumlahDibayar);
             psInsertSelesai.setString(7, statusPembayaran);
             psInsertSelesai.setString(8, metodePembayaran);
@@ -905,23 +1146,35 @@ public class selesai extends javax.swing.JFrame {
 
             // INSERT ke tabel 'denda' jika ada denda telat
             if (dendaTelatFinal > 0) {
-                String SQL_INSERT_DENDA_TELAT = "INSERT INTO denda (id_sewa, jenis_denda, jumlah_denda, keterangan_denda) VALUES (?, ?, ?, ?)";
+                // Perubahan di sini: Menambahkan 'detail_denda'
+                String SQL_INSERT_DENDA_TELAT = "INSERT INTO denda (id_sewa, jenis_denda, detail_denda, jumlah_denda, keterangan_denda) VALUES (?, ?, ?, ?, ?)";
                 psInsertDendaTelat = kon.prepareStatement(SQL_INSERT_DENDA_TELAT);
                 psInsertDendaTelat.setInt(1, idSewa);
                 psInsertDendaTelat.setString(2, "Terlambat");
-                psInsertDendaTelat.setDouble(3, dendaTelatFinal);
-                psInsertDendaTelat.setString(4, "Denda keterlambatan pengembalian motor.");
+                
+                // Detail Denda Telat: Jam keterlambatan
+                long diffMillisTelat = tanggalKembaliAktual.getTime() - tanggalTargetKembali.getTime();
+                long diffHoursTelat = (long) Math.ceil((double) diffMillisTelat / (1000.0 * 60 * 60));
+                psInsertDendaTelat.setString(3, diffHoursTelat + " jam"); // Isi detail_denda di sini
+                
+                psInsertDendaTelat.setDouble(4, dendaTelatFinal);
+                psInsertDendaTelat.setString(5, "Denda keterlambatan pengembalian motor.");
                 psInsertDendaTelat.executeUpdate();
             }
 
             // INSERT ke tabel 'denda' jika ada denda kerusakan
             if (dendaKerusakanFinal > 0 && !kondisiMotor.equals("Baik")) {
-                String SQL_INSERT_DENDA_KERUSAKAN = "INSERT INTO denda (id_sewa, jenis_denda, jumlah_denda, keterangan_denda) VALUES (?, ?, ?, ?)";
+                // Perubahan di sini: Menambahkan 'detail_denda'
+                String SQL_INSERT_DENDA_KERUSAKAN = "INSERT INTO denda (id_sewa, jenis_denda, detail_denda, jumlah_denda, keterangan_denda) VALUES (?, ?, ?, ?, ?)";
                 psInsertDendaKerusakan = kon.prepareStatement(SQL_INSERT_DENDA_KERUSAKAN);
                 psInsertDendaKerusakan.setInt(1, idSewa);
                 psInsertDendaKerusakan.setString(2, "Kerusakan");
-                psInsertDendaKerusakan.setDouble(3, dendaKerusakanFinal);
-                psInsertDendaKerusakan.setString(4, "Denda kerusakan motor: " + kondisiMotor);
+                
+                // Detail Denda Kerusakan: Kondisi motor
+                psInsertDendaKerusakan.setString(3, kondisiMotor); // Isi detail_denda di sini
+                
+                psInsertDendaKerusakan.setDouble(4, dendaKerusakanFinal);
+                psInsertDendaKerusakan.setString(5, "Kerusakan: " + kondisiMotor);
                 psInsertDendaKerusakan.executeUpdate();
             }
 
@@ -934,54 +1187,58 @@ public class selesai extends javax.swing.JFrame {
             if (rowsInsertedSelesai > 0 && rowsUpdatedSewa > 0) {
                 kon.commit();
                 JOptionPane.showMessageDialog(this, "Transaksi selesai berhasil dicatat!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-                clear_teks();
+                membersihkan_teks();
                 nonaktif_teks();
                 btn_simpan.setEnabled(false);
                 btn_batal.setEnabled(false);
                 loadPenyewaToComboBox();
-                settableload();
+                settableload(); // Muat ulang tabel selesai
             } else {
                 kon.rollback();
                 JOptionPane.showMessageDialog(this, "Gagal mencatat transaksi selesai atau memperbarui status sewa.", "Error", JOptionPane.ERROR_MESSAGE);
             }
 
-        } catch (SQLException ex) {
-            try {
-                if (kon != null) kon.rollback();
-            } catch (SQLException rollbackEx) {
-                System.err.println("Error saat rollback: " + rollbackEx.getMessage());
-            }
-            System.err.println("SQL Error di btn_simpanActionPerformed(): " + ex.getMessage());
-            JOptionPane.showMessageDialog(this,
-                    "Terjadi kesalahan database: " + ex.getMessage(), "Error Database",
-                    JOptionPane.ERROR_MESSAGE);
-        } catch (ClassNotFoundException ex) {
-            System.err.println("Driver Error di btn_simpanActionPerformed(): " + ex.getMessage());
-            JOptionPane.showMessageDialog(this,
-                    "Driver database tidak ditemukan: " + ex.getMessage(), "Error Driver",
-                    JOptionPane.ERROR_MESSAGE);
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Pastikan Jumlah Dibayarkan diisi dengan angka yang valid.", "Error Input", JOptionPane.ERROR_MESSAGE);
-        } catch (Exception ex) {
-            System.err.println("General Error di btn_simpanActionPerformed(): " + ex.getMessage());
-            JOptionPane.showMessageDialog(this,
-                    "Terjadi kesalahan tak terduga: " + ex.getMessage(), "Error Umum",
-                    JOptionPane.ERROR_MESSAGE);
-        } finally {
-            try {
-                if (psInsertSelesai != null) psInsertSelesai.close();
-                if (psUpdateSewa != null) psUpdateSewa.close();
-                if (psInsertDendaTelat != null) psInsertDendaTelat.close();
-                if (psInsertDendaKerusakan != null) psInsertDendaKerusakan.close();
-                if (kon != null) kon.close();
-            } catch (SQLException ex) {
-                System.err.println("Error closing resources in btn_simpanActionPerformed(): " + ex.getMessage());
-            }
+        } catch (Exception ex)
+        {
+            System.err.println(ex.getMessage());
         }
     }//GEN-LAST:event_btn_simpanActionPerformed
 
     private void btn_hapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_hapusActionPerformed
         // TODO add your handling code here:
+        if (row < 0) {
+            JOptionPane.showMessageDialog(null, "Pilih data denda yang akan dihapus dari tabel.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        JOptionPane.showConfirmDialog(null, "Apakah Anda yakin ingin menghapus data ini?", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
+
+        Connection kon = null;
+        Statement stt = null;
+
+        try {
+            Class.forName(driver);
+            kon = DriverManager.getConnection(database,user,pass);
+            stt = kon.createStatement();
+ 
+            String SQL = "DELETE FROM selesai " + "WHERE id_selesai = '" + tableMode1.getValueAt(row, 0).toString() + "'";
+
+            stt.executeUpdate(SQL);
+            tableMode1.removeRow(row);
+
+            JOptionPane.showMessageDialog(null, "Data denda berhasil dihapus!");
+            membersihkan_teks(); // Clear fields after successful deletion
+  
+            btn_ubah.setEnabled(false);
+            btn_hapus.setEnabled(false);
+            btn_simpan.setEnabled(true);
+            btn_tambah.setEnabled(true);
+
+        }
+        catch (Exception ex)
+        {
+            System.err.println(ex.getMessage());
+        }
     }//GEN-LAST:event_btn_hapusActionPerformed
 
     private void txt_jumlahdenda1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_jumlahdenda1ActionPerformed
@@ -1014,6 +1271,18 @@ public class selesai extends javax.swing.JFrame {
     private void combo_kondisiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_combo_kondisiActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_combo_kondisiActionPerformed
+
+    private void table_selesaiMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_table_selesaiMouseClicked
+        // TODO add your handling code here:
+        if(evt.getClickCount()== 1)
+        {
+            tampil_field();
+        }
+    }//GEN-LAST:event_table_selesaiMouseClicked
+
+    private void table_selesaiMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_table_selesaiMouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_table_selesaiMouseEntered
 
     /**
      * @param args the command line arguments
