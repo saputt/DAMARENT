@@ -1087,8 +1087,6 @@ public class sewa extends javax.swing.JFrame {
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
         // TODO add your handling code here:
-        menu_utama utama = new menu_utama();
-        utama.setVisible(true);
     }//GEN-LAST:event_formWindowClosed
 
     private void tabel_sewaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabel_sewaMouseClicked
