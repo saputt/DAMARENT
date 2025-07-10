@@ -5,6 +5,7 @@
 package damarent;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import javax.swing.JOptionPane;
@@ -79,59 +80,74 @@ public class motor extends javax.swing.JFrame {
     
     private void settableload()
     {
-        try 
-        {
-            Class.forName(driver);
-            Connection kon = DriverManager.getConnection(
-                             database,
-                             user,
-                             pass);
-            Statement stt=kon.createStatement();
-            String SQL = "select * from motor";
-            ResultSet res = stt.executeQuery(SQL);
-            while(res.next())
-            {
+       tableMode1.setRowCount(0); // Mengosongkan tabel sebelum memuat data baru
+
+        // Kueri SQL baru untuk status dinamis
+        String SQL = "SELECT " +
+                     "    m.id_motor, " +
+                     "    m.merk, " +
+                     "    m.model, " +
+                     "    m.plat_nomor, " +
+                     "    m.harga_sewa, " +
+                     "    CASE " +
+                     "        WHEN s.id_sewa IS NOT NULL THEN 'Tidak Tersedia' " +
+                     "        ELSE 'Tersedia' " +
+                     "    END AS status_sekarang " + // Membuat kolom status dinamis
+                     "FROM " +
+                     "    motor m " +
+                     "LEFT JOIN " +
+                     "    sewa s ON m.id_motor = s.id_motor " +
+                     "           AND s.status_sewa = 'aktif' " +
+                     "           AND CURDATE() BETWEEN DATE(s.tanggal_peminjaman) AND DATE(s.tanggal_kembali) " +
+                     "GROUP BY m.id_motor"; // Group by untuk memastikan setiap motor hanya muncul sekali
+
+        try (Connection kon = DriverManager.getConnection(database, user, pass);
+             Statement stt = kon.createStatement();
+             ResultSet res = stt.executeQuery(SQL)) {
+
+            while (res.next()) {
                 data[0] = res.getString("id_motor");
                 data[1] = res.getString("merk");
                 data[2] = res.getString("model");
                 data[3] = res.getString("plat_nomor");
                 data[4] = res.getString("harga_sewa");
-                data[5] = res.getString("status");
+                data[5] = res.getString("status_sekarang"); // Ambil dari kolom dinamis 'status_sekarang'
                 tableMode1.addRow(data);
             }
-            res.close();
-            stt.close();
-            kon.close();
-            
-        }
-        catch(Exception ex){
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "error", JOptionPane.INFORMATION_MESSAGE);
-            System.exit(0);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
         }
     }
     
     public void urutkanTabel() {
         tableMode1.setRowCount(0);
         String orderBy = combo_urutkan.getSelectedItem().toString().equals("Termurah") ? "ASC" : "DESC";
+
+        // Gunakan kueri SQL dinamis yang sama
+        String SQL = "SELECT " +
+                     "    m.id_motor, m.merk, m.model, m.plat_nomor, m.harga_sewa, " +
+                     "    CASE WHEN s.id_sewa IS NOT NULL THEN 'Tidak Tersedia' ELSE 'Tersedia' END AS status_sekarang " +
+                     "FROM motor m " +
+                     "LEFT JOIN sewa s ON m.id_motor = s.id_motor AND s.status_sewa = 'aktif' AND CURDATE() BETWEEN DATE(s.tanggal_peminjaman) AND DATE(s.tanggal_kembali) " +
+                     "GROUP BY m.id_motor " +
+                     "ORDER BY m.harga_sewa " + orderBy; // Tambahkan klausa ORDER BY di akhir
+
         try (Connection kon = DriverManager.getConnection(database, user, pass);
-            Statement stt = kon.createStatement();
-            ResultSet res = stt.executeQuery("SELECT * FROM motor ORDER BY harga_sewa " + orderBy)) 
-        {
-            while (res.next()) 
-            {
+             Statement stt = kon.createStatement();
+             ResultSet res = stt.executeQuery(SQL)) {
+
+            while (res.next()) {
                 data[0] = res.getString("id_motor");
                 data[1] = res.getString("merk");
                 data[2] = res.getString("model");
                 data[3] = res.getString("plat_nomor");
                 data[4] = res.getString("harga_sewa");
-                data[5] = res.getString("status");
-
+                data[5] = res.getString("status_sekarang");
                 tableMode1.addRow(data);
             }
-        }   
-        catch (Exception ex) 
-        {
-        JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 }
 
@@ -431,10 +447,9 @@ public class motor extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane1)
                 .addContainerGap())
+            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -442,7 +457,7 @@ public class motor extends javax.swing.JFrame {
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(11, 11, 11)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -609,27 +624,64 @@ public class motor extends javax.swing.JFrame {
         // TODO add your handling code here:
         tableMode1.setRowCount(0);
         String kata = txt_cari.getText();
-        String kolom = combo_kategori.getSelectedItem().toString().replace(" ", "_").toLowerCase();
+        String kategori = combo_kategori.getSelectedItem().toString();
+        String kolom;
+
+        // Menentukan kolom database berdasarkan pilihan kategori
+        switch (kategori) {
+            case "Merk":
+                kolom = "m.merk";
+                break;
+            case "Model":
+                kolom = "m.model";
+                break;
+            case "Plat Nomor":
+                kolom = "m.plat_nomor";
+                break;
+            case "Status":
+                // Pencarian status perlu penanganan khusus
+                kolom = "status_sekarang"; 
+                break;
+            default:
+                return;
+        }
+
+        // Kueri dasar yang sama dengan status dinamis
+        String baseSQL = "SELECT " +
+                         "    m.id_motor, m.merk, m.model, m.plat_nomor, m.harga_sewa, " +
+                         "    CASE WHEN s.id_sewa IS NOT NULL THEN 'Tidak Tersedia' ELSE 'Tersedia' END AS status_sekarang " +
+                         "FROM motor m " +
+                         "LEFT JOIN sewa s ON m.id_motor = s.id_motor AND s.status_sewa = 'aktif' AND CURDATE() BETWEEN DATE(s.tanggal_peminjaman) AND DATE(s.tanggal_kembali) " +
+                         "GROUP BY m.id_motor ";
+
+        // Menambahkan kondisi pencarian
+        String finalSQL;
+        if (kolom.equals("status_sekarang")) {
+            // HAVING digunakan untuk memfilter hasil agregasi atau alias
+            finalSQL = baseSQL + "HAVING status_sekarang LIKE ?";
+        } else {
+            // WHERE digunakan untuk kolom asli
+            finalSQL = baseSQL.replace("GROUP BY m.id_motor", "WHERE " + kolom + " LIKE ? GROUP BY m.id_motor");
+        }
 
         try (Connection kon = DriverManager.getConnection(database, user, pass);
-            Statement stt = kon.createStatement()) 
-        {
-            String sql = "SELECT * FROM motor WHERE " + kolom + " LIKE '%" + kata + "%'";
-            ResultSet res = stt.executeQuery(sql);
+            PreparedStatement pst = kon.prepareStatement(finalSQL)) {
 
-            while (res.next()) 
-            {
-                for (int i = 0; i < 6; i++) 
-                {
-                    data[i] = res.getString(i + 1);
-                }
+            pst.setString(1, "%" + kata + "%");
+            ResultSet res = pst.executeQuery();
+
+            while (res.next()) {
+                data[0] = res.getString("id_motor");
+                data[1] = res.getString("merk");
+                data[2] = res.getString("model");
+                data[3] = res.getString("plat_nomor");
+                data[4] = res.getString("harga_sewa");
+                data[5] = res.getString("status_sekarang");
                 tableMode1.addRow(data);
             }
-
-        } 
-        catch (Exception ex) 
-        {
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
         }
     }//GEN-LAST:event_btn_cariActionPerformed
 
