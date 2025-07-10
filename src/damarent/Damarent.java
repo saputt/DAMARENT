@@ -6,6 +6,8 @@
 
 package damarent;
 
+import javax.swing.UIManager;
+
 /**
  *
  * @author sauki
@@ -19,6 +21,7 @@ public class Damarent {
         // TODO code application logic here
         menu_utama utama = new menu_utama();
         utama.setVisible(true);
+        
     }
     
 }
