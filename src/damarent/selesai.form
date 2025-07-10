@@ -65,8 +65,10 @@
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="txt_cari" min="-2" pref="274" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
+                              <Component id="combo_kategori" min="-2" pref="101" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="btn_cari" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
                               <Component id="btn_tampil" min="-2" pref="264" max="-2" attributes="0"/>
                               <EmptySpace max="32767" attributes="0"/>
                               <Component id="jLabel8" min="-2" max="-2" attributes="0"/>
@@ -228,16 +230,17 @@
                       <Component id="jLabel20" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace pref="19" max="32767" attributes="0"/>
+              <EmptySpace min="-2" pref="19" max="-2" attributes="0"/>
               <Component id="jSeparator1" min="-2" pref="10" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabel10" linkSize="1" alignment="3" min="-2" pref="13" max="-2" attributes="0"/>
                   <Component id="txt_cari" linkSize="1" alignment="3" min="-2" pref="33" max="-2" attributes="0"/>
                   <Component id="btn_cari" linkSize="1" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="btn_tampil" linkSize="1" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="combo_sort" linkSize="1" alignment="3" min="-2" pref="34" max="-2" attributes="0"/>
                   <Component id="jLabel8" linkSize="1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="combo_kategori" alignment="1" pref="30" max="32767" attributes="0"/>
+                  <Component id="btn_tampil" linkSize="1" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="jSeparator4" min="-2" pref="2" max="-2" attributes="0"/>
@@ -578,6 +581,20 @@
         </Property>
         <Property name="text" type="java.lang.String" value="(Optional)"/>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JComboBox" name="combo_kategori">
+      <Properties>
+        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+          <StringArray count="3">
+            <StringItem index="0" value="Nama Pelanggan"/>
+            <StringItem index="1" value="Plat Nomor"/>
+            <StringItem index="2" value="Status Pembayaran"/>
+          </StringArray>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="combo_kategoriActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

@@ -51,6 +51,7 @@ public class selesai extends javax.swing.JFrame {
         sewaBiayaAwalMap = new HashMap<>();
         sewaTargetKembaliMap = new HashMap<>();
         sewaPeminjamanMap = new HashMap<>();
+        sewaHargaMotorMap = new HashMap<>();
 
         SpinnerModel hourModel = new SpinnerNumberModel(0, 0, 23, 1);
         jam_dikembalikan.setModel(hourModel);
@@ -127,7 +128,7 @@ public class selesai extends javax.swing.JFrame {
             stt = kon.createStatement();
 
             String SQL = "SELECT "
-                        + "    sl.id_selesai, sl.id_sewa, p.nama_pelanggan, m.plat_nomor, " // <<< TAMBAHKAN sl.id_sewa di SELECT
+                        + "    sl.id_selesai, sl.id_sewa, p.nama_pelanggan, m.plat_nomor, " 
                         + "    s.tanggal_peminjaman, s.tanggal_kembali, sl.tanggal_kembali_aktual, "
                         + "    sl.total_denda, sl.rincian_denda, sl.total_biaya, sl.jumlah_sudah_dibayar, "
                         + "    sl.status_pembayaran, "
@@ -315,6 +316,7 @@ public class selesai extends javax.swing.JFrame {
                          "    s.id_sewa, " +
                          "    p.nama_pelanggan, " +
                          "    m.plat_nomor, " +
+                         "    m.harga_sewa, " +
                          "    s.tanggal_peminjaman, " +
                          "    s.tanggal_kembali, " +
                          "    s.harga_sewa_awal " +
@@ -338,6 +340,7 @@ public class selesai extends javax.swing.JFrame {
                 int idSewa = res.getInt("id_sewa");
                 String namaPelanggan = res.getString("nama_pelanggan");
                 String platNomor = res.getString("plat_nomor");
+                Double hargaMotorharian = res.getDouble("harga_sewa");
                 double biayaSewaAwal = res.getDouble("harga_sewa_awal");
                 Timestamp tanggalTargetKembali = res.getTimestamp("tanggal_kembali");
                 Timestamp tanggalPeminjaman = res.getTimestamp("tanggal_peminjaman");
@@ -348,6 +351,7 @@ public class selesai extends javax.swing.JFrame {
                 sewaBiayaAwalMap.put(idSewa, biayaSewaAwal);
                 sewaTargetKembaliMap.put(idSewa, tanggalTargetKembali);
                 sewaPeminjamanMap.put(idSewa, tanggalPeminjaman);
+                sewaHargaMotorMap.put(idSewa, hargaMotorharian);
             }
 
             combo_penyewa.setModel(model);
@@ -362,27 +366,24 @@ public class selesai extends javax.swing.JFrame {
     }
 
      private void updateCalculatedFields() {
-         String selectedDisplayString = (String) combo_penyewa.getSelectedItem();
+        String selectedDisplayString = (String) combo_penyewa.getSelectedItem();
         int idSewa = 0;
         if (selectedDisplayString != null && sewaAktifMap.containsKey(selectedDisplayString)) {
             idSewa = sewaAktifMap.get(selectedDisplayString);
         }
 
-        if (selectedDisplayString != null && sewaAktifMap.containsKey(selectedDisplayString)) {
-            idSewa = sewaAktifMap.get(selectedDisplayString);
-        }
-        
         if (idSewa <= 0) {
-            // --- GUNAKAN resetCalculatedFields() di sini, dan pastikan tidak ada setText untuk txt_jumlah_denda2 di dalamnya ---
-            resetCalculatedFieldsExcludingManualDenda(); // Metode baru atau modifikasi resetCalculatedFields
-            return; 
+            resetCalculatedFieldsExcludingManualDenda();
+            return;
         }
-        
+
         if (idSewa > 0) {
             Timestamp tanggalTargetKembali = sewaTargetKembaliMap.get(idSewa);
             Timestamp tanggalPeminjaman = sewaPeminjamanMap.get(idSewa);
             double biayaSewaAwal = sewaBiayaAwalMap.get(idSewa);
+            double hargaMotorHarian = sewaHargaMotorMap.get(idSewa); // <-- Ambil harga motor dari map
 
+            // ... (sisa kode untuk set text field tanggal)
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy HH:mm");
             if (tanggalTargetKembali != null) {
                 txt_tanggal_kembali_seharusnya.setText(dateFormat.format(tanggalTargetKembali));
@@ -395,48 +396,43 @@ public class selesai extends javax.swing.JFrame {
                 txt_tanggal_peminjaman.setText("N/A");
             }
 
+
             Date tglKembaliActualDate = tanggal_dikembalikan.getDate();
             int jamAktual = (Integer) jam_dikembalikan.getValue();
             int menitAktual = (Integer) menit_dikembalikan.getValue();
 
             double dendaTelat = 0.0;
             double dendaKerusakan = 0.0;
-            long jumlahJamTelat = 0;
-            
-            // Get dendaKerusakan from txt_jumlah_denda2
+
             try {
                 String denda2Text = txt_jumlah_denda2.getText();
                 if (!denda2Text.isEmpty()) {
                     dendaKerusakan = Double.parseDouble(denda2Text);
                 }
             } catch (NumberFormatException ex) {
-                // Handle case where txt_jumlah_denda2 is not a valid number
-                // You might want to show an error message or set dendaKerusakan to 0
-                dendaKerusakan = 0.0; 
-                // Optionally, clear the invalid text or highlight the field
-                // txt_jumlah_denda2.setText("0.0"); 
+                dendaKerusakan = 0.0;
                 System.err.println("Invalid number format in txt_jumlah_denda2: " + ex.getMessage());
             }
 
             if (tglKembaliActualDate != null && tanggalTargetKembali != null) {
-                // Only calculate dendaTelat if actual return date is available and target return date exists
-                dendaTelat = hitungDendaTelat(tanggalTargetKembali, tglKembaliActualDate, jamAktual, menitAktual, biayaSewaAwal);
+                // Panggil hitungDendaTelat dengan parameter baru
+                dendaTelat = hitungDendaTelat(tanggalTargetKembali, tglKembaliActualDate, jamAktual, menitAktual, hargaMotorHarian);
             }
-            
-            double totalDendaYangDitampilkan = dendaTelat + dendaKerusakan; // Sum of both denda types
+
+            double totalDendaYangDitampilkan = dendaTelat + dendaKerusakan;
             double totalBiayaYangHarusDibayar = biayaSewaAwal + totalDendaYangDitampilkan;
 
             txt_jumlah_denda.setText(String.format("%.2f", totalDendaYangDitampilkan));
             txt_total_bayar.setText(String.format("%.2f", totalBiayaYangHarusDibayar));
 
         } else {
-            // Reset fields if no valid sewa is selected
+            // ... (sisa kode untuk reset fields)
             txt_total_bayar.setText("0.0");
-            txt_jumlah_denda.setText("0.0"); // Reset total denda
+            txt_jumlah_denda.setText("0.0"); 
             txt_tanggal_kembali_seharusnya.setText("");
             txt_tanggal_peminjaman.setText("");
-            txt_rincian_denda.setText(""); // Clear rincian denda
-            txt_jumlah_denda2.setText(""); // Clear manual denda
+            txt_rincian_denda.setText("");
+            txt_jumlah_denda2.setText("");
         }
     }
 
@@ -451,7 +447,7 @@ public class selesai extends javax.swing.JFrame {
         // that should be handled in tampil_field().
     }
      
-    private double hitungDendaTelat(Timestamp tanggalTargetKembali, Date tanggalAktual, int jamAktual, int menitAktual, double hargaSewaAwal) {
+    private double hitungDendaTelat(Timestamp tanggalTargetKembali, Date tanggalAktual, int jamAktual, int menitAktual, double dendaHarian) {
         if (tanggalTargetKembali == null || tanggalAktual == null) {
             return 0.0;
         }
@@ -467,27 +463,31 @@ public class selesai extends javax.swing.JFrame {
         calAktual.set(Calendar.MILLISECOND, 0);
 
         if (calAktual.compareTo(calTarget) <= 0) {
+            txt_rincian_denda.setText("Tepat Waktu");
             return 0.0;
         }
 
-        long diffHours = 0; 
-        if (calAktual.compareTo(calTarget) > 0) { // Jika aktual lebih lambat dari target
         long diffMillis = calAktual.getTimeInMillis() - calTarget.getTimeInMillis();
-        diffHours = (long) Math.ceil((double)diffMillis / (1000.0 * 60 * 60)); // Bulatkan ke atas ke jam terdekat
-    }
-        
-        long diffMillis = calAktual.getTimeInMillis() - calTarget.getTimeInMillis();
-        double diffHoursFraction = (double)diffMillis / (1000.0 * 60 * 60); 
+        long diffHours = (long) Math.ceil((double) diffMillis / (1000.0 * 60 * 60));
 
         double denda = 0.0;
         double dendaPerJam = 10000.0;
-        if (diffHours > 4) { // Contoh logika denda per hari jika > 4 jam
-            long totalDaysCeiled = (long) Math.ceil(diffHours / 24.0);
-            denda = totalDaysCeiled * hargaSewaAwal;
-        } else {
-            denda = diffHours * dendaPerJam; // Denda per jam
-        }
+
+        if (diffHours > 4) {
+            // 1. Hitung jumlah hari telat (total jam telat / 24, dibulatkan ke atas)
+            long jumlahHariTelat = (long) Math.ceil(diffHours / 24.0);
+
+            // 2. Denda adalah jumlah hari telat dikalikan harga sewa harian
+            denda = jumlahHariTelat * dendaHarian;
+
         
+
+        } else {
+            // Jika telat <= 4 jam, logika denda per jam tetap sama
+            denda = diffHours * dendaPerJam;
+        }
+
+
         return denda;
     }
 
@@ -629,6 +629,7 @@ public class selesai extends javax.swing.JFrame {
         jLabel14 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
         jLabel20 = new javax.swing.JLabel();
+        combo_kategori = new javax.swing.JComboBox();
 
         jLabel3.setText("jLabel3");
 
@@ -823,6 +824,13 @@ public class selesai extends javax.swing.JFrame {
         jLabel20.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel20.setText("(Optional)");
 
+        combo_kategori.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Nama Pelanggan", "Plat Nomor", "Status Pembayaran" }));
+        combo_kategori.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                combo_kategoriActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -858,8 +866,10 @@ public class selesai extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(txt_cari, javax.swing.GroupLayout.PREFERRED_SIZE, 274, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(combo_kategori, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(btn_cari)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGap(11, 11, 11)
                                 .addComponent(btn_tampil, javax.swing.GroupLayout.PREFERRED_SIZE, 264, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel8)
@@ -984,16 +994,17 @@ public class selesai extends javax.swing.JFrame {
                                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel20)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
+                .addGap(19, 19, 19)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 13, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txt_cari, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btn_cari)
-                    .addComponent(btn_tampil)
                     .addComponent(combo_sort, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8))
+                    .addComponent(jLabel8)
+                    .addComponent(combo_kategori, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+                    .addComponent(btn_tampil))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -1023,10 +1034,88 @@ public class selesai extends javax.swing.JFrame {
 
     private void btn_cariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_cariActionPerformed
         // TODO add your handling code here:
+        String keyword = txt_cari.getText();
+        if (keyword.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Kotak pencarian tidak boleh kosong.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            txt_cari.requestFocus();
+            return;
+        }
+
+        // Mengosongkan tabel sebelum menampilkan hasil pencarian
+        tableMode1.setRowCount(0);
+
+        // Menentukan kolom database yang akan dicari berdasarkan pilihan JComboBox
+        String kategori = (String) combo_kategori.getSelectedItem();
+        String searchColumn;
+
+        switch (kategori) {
+            case "Nama Pelanggan":
+                searchColumn = "p.nama_pelanggan";
+                break;
+            case "Plat Nomor":
+                searchColumn = "m.plat_nomor";
+                break;
+            case "Status Pembayaran":
+                searchColumn = "sl.status_pembayaran";
+                break;
+            default:
+                JOptionPane.showMessageDialog(this, "Kategori pencarian tidak valid.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+        }
+
+        // Kueri SQL dasar untuk form 'selesai'
+        String sql = "SELECT " +
+                     "    sl.id_selesai, sl.id_sewa, p.nama_pelanggan, m.plat_nomor, " +
+                     "    s.tanggal_peminjaman, s.tanggal_kembali, sl.tanggal_kembali_aktual, " +
+                     "    sl.total_denda, sl.rincian_denda, sl.total_biaya, sl.jumlah_sudah_dibayar, " +
+                     "    sl.status_pembayaran, sl.jumlah_jam_telat " +
+                     "FROM selesai sl " +
+                     "JOIN sewa s ON sl.id_sewa = s.id_sewa " +
+                     "JOIN pelanggan p ON s.id_pelanggan = p.id_pelanggan " +
+                     "JOIN motor m ON s.id_motor = m.id_motor " +
+                     "WHERE " + searchColumn + " LIKE ?"; // Kondisi pencarian
+
+        try (Connection kon = DriverManager.getConnection(database, user, pass);
+             PreparedStatement pst = kon.prepareStatement(sql)) {
+
+            pst.setString(1, "%" + keyword + "%");
+
+            try (ResultSet res = pst.executeQuery()) {
+                boolean dataDitemukan = false;
+                while (res.next()) {
+                    dataDitemukan = true;
+                    Object[] data = new Object[13];
+                    data[0] = res.getString("id_selesai");
+                    data[1] = res.getInt("id_sewa");
+                    data[2] = res.getString("nama_pelanggan");
+                    data[3] = res.getString("plat_nomor");
+                    data[4] = res.getTimestamp("tanggal_peminjaman");
+                    data[5] = res.getTimestamp("tanggal_kembali");
+                    data[6] = res.getTimestamp("tanggal_kembali_aktual");
+                    data[7] = res.getDouble("total_denda");
+                    data[8] = res.getString("rincian_denda");
+                    data[9] = res.getInt("jumlah_jam_telat");
+                    data[10] = res.getDouble("total_biaya");
+                    data[11] = res.getDouble("jumlah_sudah_dibayar");
+                    data[12] = res.getString("status_pembayaran");
+                    tableMode1.addRow(data);
+                }
+
+                if (!dataDitemukan) {
+                    JOptionPane.showMessageDialog(this, "Data tidak ditemukan.", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+
+        } catch (Exception ex) {
+            System.err.println("Error saat melakukan pencarian: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
     }//GEN-LAST:event_btn_cariActionPerformed
 
     private void btn_tampilActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_tampilActionPerformed
         // TODO add your handling code here:
+        settableload();
     }//GEN-LAST:event_btn_tampilActionPerformed
 
     private void btn_tambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_tambahActionPerformed
@@ -1337,6 +1426,7 @@ public class selesai extends javax.swing.JFrame {
 
     private void combo_sortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_combo_sortActionPerformed
         // TODO add your handling code here:
+        sorting();
     }//GEN-LAST:event_combo_sortActionPerformed
 
     private void combo_penyewaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_combo_penyewaActionPerformed
@@ -1384,6 +1474,10 @@ public class selesai extends javax.swing.JFrame {
         updateCalculatedFields();
     }//GEN-LAST:event_txt_jumlah_denda2KeyReleased
 
+    private void combo_kategoriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_combo_kategoriActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_combo_kategoriActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1424,6 +1518,7 @@ public class selesai extends javax.swing.JFrame {
     private HashMap<Integer, Timestamp> sewaTargetKembaliMap;
     private HashMap<Integer, Timestamp> sewaPeminjamanMap;
     private javax.swing.JLabel jLabelJumlahHarusDibayarkan;
+    private HashMap<Integer, Double> sewaHargaMotorMap;
     private java.util.Map<String, Integer> penggunaMap;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btn_batal;
@@ -1433,6 +1528,7 @@ public class selesai extends javax.swing.JFrame {
     private javax.swing.JButton btn_tambah;
     private javax.swing.JButton btn_tampil;
     private javax.swing.JButton btn_ubah;
+    private javax.swing.JComboBox combo_kategori;
     private javax.swing.JComboBox combo_penyewa;
     private javax.swing.JComboBox combo_sort;
     private javax.swing.JLabel jLabel1;
