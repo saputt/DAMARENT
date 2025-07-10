@@ -83,22 +83,22 @@ public class motor extends javax.swing.JFrame {
        tableMode1.setRowCount(0);
 
         String SQL = "SELECT " +
-                     "    m.id_motor, " +
-                     "    m.merk, " +
-                     "    m.model, " +
-                     "    m.plat_nomor, " +
-                     "    m.harga_sewa, " +
-                     "    CASE " +
-                     "        WHEN s.id_sewa IS NOT NULL THEN 'Tidak Tersedia' " +
-                     "        ELSE 'Tersedia' " +
-                     "    END AS status_sekarang " + 
-                     "FROM " +
-                     "    motor m " +
-                     "LEFT JOIN " +
-                     "    sewa s ON m.id_motor = s.id_motor " +
-                     "           AND s.status_sewa = 'aktif' " +
-                     "           AND CURDATE() BETWEEN DATE(s.tanggal_peminjaman) AND DATE(s.tanggal_kembali) " +
-                     "GROUP BY m.id_motor"; 
+                 "   m.id_motor, " +
+                 "   m.merk, " +
+                 "   m.model, " +
+                 "   m.plat_nomor, " +
+                 "   m.harga_sewa, " +
+                 "   CASE " +
+                 "       WHEN MAX(s.id_sewa) IS NOT NULL THEN 'Tidak Tersedia' " + // <-- PERUBAHAN
+                 "       ELSE 'Tersedia' " +
+                 "   END AS status_sekarang " +
+                 "FROM " +
+                 "   motor m " +
+                 "LEFT JOIN " +
+                 "   sewa s ON m.id_motor = s.id_motor " +
+                 "           AND s.status_sewa = 'aktif' " +
+                 "           AND CURDATE() BETWEEN DATE(s.tanggal_peminjaman) AND DATE(s.tanggal_kembali) " +
+                 "GROUP BY m.id_motor, m.merk, m.model, m.plat_nomor, m.harga_sewa";
 
         try (Connection kon = DriverManager.getConnection(database, user, pass);
              Statement stt = kon.createStatement();
@@ -123,13 +123,13 @@ public class motor extends javax.swing.JFrame {
         tableMode1.setRowCount(0);
         String orderBy = combo_urutkan.getSelectedItem().toString().equals("Termurah") ? "ASC" : "DESC";
 
-        String SQL = "SELECT " +
-                     "    m.id_motor, m.merk, m.model, m.plat_nomor, m.harga_sewa, " +
-                     "    CASE WHEN s.id_sewa IS NOT NULL THEN 'Tidak Tersedia' ELSE 'Tersedia' END AS status_sekarang " +
-                     "FROM motor m " +
-                     "LEFT JOIN sewa s ON m.id_motor = s.id_motor AND s.status_sewa = 'aktif' AND CURDATE() BETWEEN DATE(s.tanggal_peminjaman) AND DATE(s.tanggal_kembali) " +
-                     "GROUP BY m.id_motor " +
-                     "ORDER BY m.harga_sewa " + orderBy; 
+         String SQL = "SELECT " +
+                 "   m.id_motor, m.merk, m.model, m.plat_nomor, m.harga_sewa, " +
+                 "   CASE WHEN MAX(s.id_sewa) IS NOT NULL THEN 'Tidak Tersedia' ELSE 'Tersedia' END AS status_sekarang " + // <-- PERUBAHAN
+                 "FROM motor m " +
+                 "LEFT JOIN sewa s ON m.id_motor = s.id_motor AND s.status_sewa = 'aktif' AND CURDATE() BETWEEN DATE(s.tanggal_peminjaman) AND DATE(s.tanggal_kembali) " +
+                 "GROUP BY m.id_motor, m.merk, m.model, m.plat_nomor, m.harga_sewa " +
+                 "ORDER BY m.harga_sewa " + orderBy;
 
         try (Connection kon = DriverManager.getConnection(database, user, pass);
              Statement stt = kon.createStatement();
@@ -624,17 +624,17 @@ public class motor extends javax.swing.JFrame {
         }
 
         String baseSQL = "SELECT " +
-                         "    m.id_motor, m.merk, m.model, m.plat_nomor, m.harga_sewa, " +
-                         "    CASE WHEN s.id_sewa IS NOT NULL THEN 'Tidak Tersedia' ELSE 'Tersedia' END AS status_sekarang " +
-                         "FROM motor m " +
-                         "LEFT JOIN sewa s ON m.id_motor = s.id_motor AND s.status_sewa = 'aktif' AND CURDATE() BETWEEN DATE(s.tanggal_peminjaman) AND DATE(s.tanggal_kembali) " +
-                         "GROUP BY m.id_motor ";
+                     "   m.id_motor, m.merk, m.model, m.plat_nomor, m.harga_sewa, " +
+                     "   CASE WHEN MAX(s.id_sewa) IS NOT NULL THEN 'Tidak Tersedia' ELSE 'Tersedia' END AS status_sekarang " + // <-- PERUBAHAN
+                     "FROM motor m " +
+                     "LEFT JOIN sewa s ON m.id_motor = s.id_motor AND s.status_sewa = 'aktif' AND CURDATE() BETWEEN DATE(s.tanggal_peminjaman) AND DATE(s.tanggal_kembali) ";
 
         String finalSQL;
         if (kolom.equals("status_sekarang")) {
-            finalSQL = baseSQL + "HAVING status_sekarang LIKE ?";
+            finalSQL = baseSQL + "GROUP BY m.id_motor, m.merk, m.model, m.plat_nomor, m.harga_sewa HAVING status_sekarang LIKE ?";
         } else {
-            finalSQL = baseSQL.replace("GROUP BY m.id_motor", "WHERE " + kolom + " LIKE ? GROUP BY m.id_motor");
+            // Tambahkan GROUP BY ke klausa WHERE juga
+            finalSQL = baseSQL + "WHERE " + kolom + " LIKE ? GROUP BY m.id_motor, m.merk, m.model, m.plat_nomor, m.harga_sewa";
         }
 
         try (Connection kon = DriverManager.getConnection(database, user, pass);
