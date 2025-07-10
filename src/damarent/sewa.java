@@ -144,8 +144,6 @@ public class sewa extends javax.swing.JFrame {
                 data[9] = res.getDouble("harga_sewa_awal");
                 data[10] = res.getString("status_sewa");
 
-                // --- PERBAIKAN DI SINI ---
-                // Tambahkan baris data ke model tabel agar tampil di layar
                 tableMode1.addRow(data);
             }
         } catch(Exception ex){
@@ -270,7 +268,6 @@ public class sewa extends javax.swing.JFrame {
         }
 
         try {
-            // Ambil semua data dari baris tabel yang dipilih
             String idSewa = tableMode1.getValueAt(row, 0).toString();
             String idPelanggan = tableMode1.getValueAt(row, 1).toString();
             String namaPelanggan = tableMode1.getValueAt(row, 2).toString();
@@ -280,22 +277,17 @@ public class sewa extends javax.swing.JFrame {
             Timestamp tanggalPeminjaman = (Timestamp) tableMode1.getValueAt(row, 6);
             Timestamp tanggalTargetKembali = (Timestamp) tableMode1.getValueAt(row, 7);
 
-            // --- BAGIAN YANG DIPERBAIKI ---
-            // 1. Baca kolom 8 ("Harga Sewa/Hari") sebagai Double
             double hargaSewaHari = (Double) tableMode1.getValueAt(row, 8);
 
-            // 2. Baca kolom 9 ("Harga Sewa Awal") sebagai Double
             double hargaSewaAwal = (Double) tableMode1.getValueAt(row, 9);
 
             String statusSewa = tableMode1.getValueAt(row, 10).toString();
 
-            // 3. Hitung kembali durasi hari dari data yang ada
             int durasiHari = 0;
-            if (hargaSewaHari > 0) { // Menghindari pembagian dengan nol
+            if (hargaSewaHari > 0) { 
                 durasiHari = (int) Math.round(hargaSewaAwal / hargaSewaHari);
             }
 
-            // Mengisi komponen form dengan data yang sudah diambil
             if (tanggalPeminjaman != null) {
                 tanggal_diambil.setDate(new Date(tanggalPeminjaman.getTime()));
 
@@ -309,10 +301,8 @@ public class sewa extends javax.swing.JFrame {
                 menit_diambil.setValue(0);
             }
 
-            // 4. Gunakan durasiHari yang sudah dihitung untuk mengisi JSpinner
             jumlah_hari.setValue(durasiHari);
 
-            // Mengisi ComboBox Pelanggan
             String displayPelanggan = idPelanggan + " - " + namaPelanggan;
             if (((DefaultComboBoxModel)combo_penyewa.getModel()).getIndexOf(displayPelanggan) != -1) {
                 combo_penyewa.setSelectedItem(displayPelanggan);
@@ -320,7 +310,6 @@ public class sewa extends javax.swing.JFrame {
                 combo_penyewa.setSelectedIndex(0);
             }
 
-            // Mengisi ComboBox Motor
             String displayMotor = merkMotor + " - " + modelMotor + " (" + platNomor + ")";
             if (((DefaultComboBoxModel)combo_motor.getModel()).getIndexOf(displayMotor) != -1) {
                 combo_motor.setSelectedItem(displayMotor);
@@ -341,17 +330,13 @@ public class sewa extends javax.swing.JFrame {
     }
     
     private void aturWaktuSekarang() {
-        // Membuat objek Kalender untuk mendapatkan waktu saat ini
         Calendar kalender = Calendar.getInstance();
 
-        // Mengatur komponen tanggal (JDateChooser)
         tanggal_diambil.setDate(kalender.getTime());
 
-        // Mengatur komponen jam (JSpinner)
         int jamSekarang = kalender.get(Calendar.HOUR_OF_DAY);
         jam_diambil.setValue(jamSekarang);
 
-        // Mengatur komponen menit (JSpinner)
         int menitSekarang = kalender.get(Calendar.MINUTE);
         menit_diambil.setValue(menitSekarang);
     }
@@ -784,8 +769,7 @@ public class sewa extends javax.swing.JFrame {
         int jam = (Integer) jam_diambil.getValue();
         int menit = (Integer) menit_diambil.getValue();
         int jumlahHari = (Integer) jumlah_hari.getValue();
-
-        // ... (kode untuk menghitung timestamp peminjaman dan pengembalian) ...
+        
         Calendar calPeminjaman = Calendar.getInstance();
         calPeminjaman.setTime(tanggalPeminjamanDate);
         calPeminjaman.set(Calendar.HOUR_OF_DAY, jam);
@@ -797,8 +781,6 @@ public class sewa extends javax.swing.JFrame {
         calTargetKembali.add(Calendar.DAY_OF_YEAR, jumlahHari);
         java.sql.Timestamp tanggalTargetKembaliTimestamp = new java.sql.Timestamp(calTargetKembali.getTimeInMillis());
 
-
-        // ... (kode untuk validasi pelanggan dan motor) ...
         String selectedPelangganDisplay = (String) combo_penyewa.getSelectedItem();
         if (selectedPelangganDisplay == null || selectedPelangganDisplay.equals("Pilih Pelanggan")) {
             JOptionPane.showMessageDialog(this, "Silakan pilih pelanggan.", "Peringatan", JOptionPane.WARNING_MESSAGE);
@@ -812,10 +794,6 @@ public class sewa extends javax.swing.JFrame {
         }
         int idMotor = motorMap.get(selectedMotorDisplay);
 
-
-        // --- PERBAIKAN DI SINI ---
-        // Hapus semua referensi ke combo_status
-        // Langsung tetapkan status sewa sebagai "aktif"
         String statusSewaDB = "aktif";
 
         double hargaSewaPerHari = 0.0;
@@ -842,7 +820,7 @@ public class sewa extends javax.swing.JFrame {
                 pst.setTimestamp(3, tanggalPeminjamanTimestamp);
                 pst.setTimestamp(4, tanggalTargetKembaliTimestamp);
                 pst.setDouble(5, biayaSewaAwal);
-                pst.setString(6, statusSewaDB); // Menggunakan status "aktif"
+                pst.setString(6, statusSewaDB);
 
                 int rowsAffected = pst.executeUpdate();
 

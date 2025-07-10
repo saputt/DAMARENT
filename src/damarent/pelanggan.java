@@ -543,7 +543,6 @@ public class pelanggan extends javax.swing.JFrame {
 
     private void btn_cariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_cariActionPerformed
         // TODO add your handling code here:
-        // TODO add your handling code here:
         String cari = txt_cari.getText().toUpperCase();
         if(cari.isEmpty())
         {
@@ -641,7 +640,6 @@ public class pelanggan extends javax.swing.JFrame {
 
     private void btn_tambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_tambahActionPerformed
         // TODO add your handling code here:
-         // TODO add your handling code here:
         membersihkan_teks();
         txt_nama_pelanggan.requestFocus();
         btn_simpan.setEnabled(true);

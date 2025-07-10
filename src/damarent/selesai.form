@@ -233,14 +233,16 @@
               <EmptySpace min="-2" pref="19" max="-2" attributes="0"/>
               <Component id="jSeparator1" min="-2" pref="10" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jLabel10" linkSize="1" alignment="3" min="-2" pref="13" max="-2" attributes="0"/>
-                  <Component id="txt_cari" linkSize="1" alignment="3" min="-2" pref="33" max="-2" attributes="0"/>
-                  <Component id="btn_cari" linkSize="1" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="combo_sort" linkSize="1" alignment="3" min="-2" pref="34" max="-2" attributes="0"/>
-                  <Component id="jLabel8" linkSize="1" alignment="3" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="combo_kategori" alignment="1" pref="30" max="32767" attributes="0"/>
-                  <Component id="btn_tampil" linkSize="1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel10" linkSize="1" alignment="3" min="-2" pref="13" max="-2" attributes="0"/>
+                      <Component id="txt_cari" linkSize="1" alignment="3" min="-2" pref="33" max="-2" attributes="0"/>
+                      <Component id="btn_cari" linkSize="1" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="combo_sort" linkSize="1" alignment="3" min="-2" pref="34" max="-2" attributes="0"/>
+                      <Component id="jLabel8" linkSize="1" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btn_tampil" linkSize="1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="jSeparator4" min="-2" pref="2" max="-2" attributes="0"/>
