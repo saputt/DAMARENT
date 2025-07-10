@@ -6,6 +6,9 @@
 
 package damarent;
 
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+
+
 /**
  *
  * @author sauki
@@ -16,7 +19,8 @@ public class Damarent {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        FlatMacDarkLaf.setup();
+
         menu_utama utama = new menu_utama();
         utama.setVisible(true);
     }

@@ -80,9 +80,8 @@ public class motor extends javax.swing.JFrame {
     
     private void settableload()
     {
-       tableMode1.setRowCount(0); // Mengosongkan tabel sebelum memuat data baru
+       tableMode1.setRowCount(0);
 
-        // Kueri SQL baru untuk status dinamis
         String SQL = "SELECT " +
                      "    m.id_motor, " +
                      "    m.merk, " +
@@ -92,14 +91,14 @@ public class motor extends javax.swing.JFrame {
                      "    CASE " +
                      "        WHEN s.id_sewa IS NOT NULL THEN 'Tidak Tersedia' " +
                      "        ELSE 'Tersedia' " +
-                     "    END AS status_sekarang " + // Membuat kolom status dinamis
+                     "    END AS status_sekarang " + 
                      "FROM " +
                      "    motor m " +
                      "LEFT JOIN " +
                      "    sewa s ON m.id_motor = s.id_motor " +
                      "           AND s.status_sewa = 'aktif' " +
                      "           AND CURDATE() BETWEEN DATE(s.tanggal_peminjaman) AND DATE(s.tanggal_kembali) " +
-                     "GROUP BY m.id_motor"; // Group by untuk memastikan setiap motor hanya muncul sekali
+                     "GROUP BY m.id_motor"; 
 
         try (Connection kon = DriverManager.getConnection(database, user, pass);
              Statement stt = kon.createStatement();
@@ -111,7 +110,7 @@ public class motor extends javax.swing.JFrame {
                 data[2] = res.getString("model");
                 data[3] = res.getString("plat_nomor");
                 data[4] = res.getString("harga_sewa");
-                data[5] = res.getString("status_sekarang"); // Ambil dari kolom dinamis 'status_sekarang'
+                data[5] = res.getString("status_sekarang");
                 tableMode1.addRow(data);
             }
         } catch (Exception ex) {
@@ -124,14 +123,13 @@ public class motor extends javax.swing.JFrame {
         tableMode1.setRowCount(0);
         String orderBy = combo_urutkan.getSelectedItem().toString().equals("Termurah") ? "ASC" : "DESC";
 
-        // Gunakan kueri SQL dinamis yang sama
         String SQL = "SELECT " +
                      "    m.id_motor, m.merk, m.model, m.plat_nomor, m.harga_sewa, " +
                      "    CASE WHEN s.id_sewa IS NOT NULL THEN 'Tidak Tersedia' ELSE 'Tersedia' END AS status_sekarang " +
                      "FROM motor m " +
                      "LEFT JOIN sewa s ON m.id_motor = s.id_motor AND s.status_sewa = 'aktif' AND CURDATE() BETWEEN DATE(s.tanggal_peminjaman) AND DATE(s.tanggal_kembali) " +
                      "GROUP BY m.id_motor " +
-                     "ORDER BY m.harga_sewa " + orderBy; // Tambahkan klausa ORDER BY di akhir
+                     "ORDER BY m.harga_sewa " + orderBy; 
 
         try (Connection kon = DriverManager.getConnection(database, user, pass);
              Statement stt = kon.createStatement();
@@ -158,7 +156,6 @@ public class motor extends javax.swing.JFrame {
         txt_model.setText("");
         txt_plat.setText("");
         txt_harga.setText("");
-        combo_status.setSelectedItem(null);
     }
     public void aktif_teks()
     {
@@ -166,7 +163,6 @@ public class motor extends javax.swing.JFrame {
         txt_model.setEnabled(true);
         txt_plat.setEnabled(true);
         txt_harga.setEnabled(true);
-        combo_status.setEnabled(true);
     }
     
     int row = 0;
@@ -177,7 +173,6 @@ public class motor extends javax.swing.JFrame {
         txt_model.setText(tableMode1.getValueAt(row, 2).toString());
         txt_plat.setText(tableMode1.getValueAt(row, 3).toString());
         txt_harga.setText(tableMode1.getValueAt(row, 4).toString());
-        combo_status.setSelectedItem(tableMode1.getValueAt(row, 5).toString());
         
         btn_simpan.setEnabled(false);
         btn_ubah.setEnabled(true);
@@ -192,7 +187,6 @@ public class motor extends javax.swing.JFrame {
         txt_model.setEnabled(false);
         txt_plat.setEnabled(false);
         txt_harga.setEnabled(false);
-        combo_status.setEnabled(false);
     }
 
     /**
@@ -205,7 +199,6 @@ public class motor extends javax.swing.JFrame {
     private void initComponents() {
 
         jLabel2 = new javax.swing.JLabel();
-        combo_status = new javax.swing.JComboBox();
         btn_tambah = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
@@ -222,7 +215,6 @@ public class motor extends javax.swing.JFrame {
         btn_hapus = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
         btn_batal = new javax.swing.JButton();
-        jLabel7 = new javax.swing.JLabel();
         txt_model = new javax.swing.JTextField();
         txt_plat = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
@@ -241,8 +233,6 @@ public class motor extends javax.swing.JFrame {
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel2.setText("Merk");
-
-        combo_status.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Tersedia", "Tidak" }));
 
         btn_tambah.setText("Tambah");
         btn_tambah.addActionListener(new java.awt.event.ActionListener() {
@@ -356,13 +346,9 @@ public class motor extends javax.swing.JFrame {
 
         btn_batal.setText("Batal");
 
-        jLabel7.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        jLabel7.setText("Status");
-
-        jPanel1.setBackground(new java.awt.Color(204, 204, 204));
         jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
-        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 36)); // NOI18N
+        jLabel1.setFont(jLabel1.getFont().deriveFont(jLabel1.getFont().getStyle() | java.awt.Font.BOLD, jLabel1.getFont().getSize()+24));
         jLabel1.setText("Daftar Motor");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -427,15 +413,16 @@ public class motor extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txt_plat, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txt_harga, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(47, 47, 47)
-                .addComponent(jLabel7)
-                .addGap(31, 31, 31)
-                .addComponent(combo_status, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(51, 51, 51))
+                .addGap(342, 342, 342))
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addGap(246, 246, 246)
-                .addComponent(btn_tambah)
+                .addContainerGap()
+                .addComponent(jScrollPane1)
+                .addContainerGap())
+            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(224, 224, 224)
+                .addComponent(btn_tambah, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btn_simpan)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -445,12 +432,10 @@ public class motor extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btn_batal)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1)
-                .addContainerGap())
-            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
+
+        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btn_batal, btn_hapus, btn_simpan, btn_tambah, btn_ubah});
+
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
@@ -458,15 +443,11 @@ public class motor extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(11, 11, 11)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(txt_plat, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txt_merk, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(combo_status, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel7)))
+                                .addComponent(txt_plat, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txt_merk, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -478,19 +459,21 @@ public class motor extends javax.swing.JFrame {
                         .addComponent(jLabel2)
                         .addGap(18, 18, 18)
                         .addComponent(jLabel3)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 426, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btn_simpan)
                     .addComponent(btn_ubah)
                     .addComponent(btn_hapus)
                     .addComponent(btn_batal)
-                    .addComponent(btn_tambah))
-                .addGap(40, 40, 40))
+                    .addComponent(btn_tambah, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
+
+        layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {btn_batal, btn_hapus, btn_simpan, btn_tambah, btn_ubah});
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -515,42 +498,37 @@ public class motor extends javax.swing.JFrame {
 
     private void btn_simpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_simpanActionPerformed
         // TODO add your handling code here:
-        if ((txt_merk.getText().isEmpty()) || (txt_plat.getText().isEmpty()))
-        {
-            JOptionPane.showMessageDialog(null,
-                            "data tidak boleh kosong, silahkan dilengkapi");
+        if (txt_merk.getText().isEmpty() || txt_plat.getText().isEmpty() || txt_harga.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Merk, Plat Nomor, dan Harga tidak boleh kosong!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-            try(Connection kon = DriverManager.getConnection(database, user, pass);
-                Statement stt = kon.createStatement())
-            {
-                String SQL = String.format("INSERT INTO motor (merk, model, plat_nomor, harga_sewa, status) VALUES ('%s','%s','%s','%s','%s')",
-                                    txt_merk.getText(), 
-                                    txt_model.getText(), 
-                                    txt_plat.getText(), 
-                                    txt_harga.getText(), 
-                                    combo_status.getSelectedItem().toString());
-                stt.executeUpdate(SQL);
-                
-                data[1] = txt_merk.getText();
-                data[2] = txt_model.getText();
-                data[3] = txt_plat.getText();
-                data[4] = txt_harga.getText();
-                data[5] = combo_status.getSelectedItem().toString();
-                tableMode1.insertRow(0, data);
-                
-                membersihkan_teks();
-                nonaktif_teks();
-                btn_simpan.setEnabled(false);
-                
-                JOptionPane.showMessageDialog(null,
-                        "Data Berhasil Disimpan!");
-            }
-            catch (Exception ex)
-            {
-                JOptionPane.showMessageDialog(null, ex.getMessage(),"error", JOptionPane.ERROR_MESSAGE);
-            }
+        String sql = "INSERT INTO motor (merk, model, plat_nomor, harga_sewa, status) VALUES (?, ?, ?, ?, ?)";
+
+        try (Connection kon = DriverManager.getConnection(database, user, pass);
+             PreparedStatement pst = kon.prepareStatement(sql)) {
+
+            pst.setString(1, txt_merk.getText());
+            pst.setString(2, txt_model.getText());
+            pst.setString(3, txt_plat.getText());
+            pst.setDouble(4, Double.parseDouble(txt_harga.getText()));
+            pst.setString(5, "Tersedia"); // Status otomatis "Tersedia"
+
+            pst.executeUpdate();
+
+            JOptionPane.showMessageDialog(this, "Data Motor Berhasil Disimpan!");
+
+            settableload(); // Muat ulang tabel untuk menampilkan data baru
+            membersihkan_teks();
+            nonaktif_teks();
+            btn_simpan.setEnabled(false);
+            btn_tambah.setEnabled(true);
+
+        }
+        catch (Exception ex)
+        {
+            JOptionPane.showMessageDialog(null, ex.getMessage(),"error", JOptionPane.ERROR_MESSAGE);
+        }
                                                   
     }//GEN-LAST:event_btn_simpanActionPerformed
 
@@ -585,33 +563,34 @@ public class motor extends javax.swing.JFrame {
 
     private void btn_ubahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_ubahActionPerformed
         // TODO add your handling code here:
-        try (Connection kon = DriverManager.getConnection(database,user,pass);
-            Statement stt = kon.createStatement())
-        {
-            String id = tableMode1.getValueAt(row, 0).toString();
-            stt.executeUpdate(
-                "UPDATE  motor SET "+
-                "merk='"+txt_merk.getText()+"',"+
-                "model='"+txt_model.getText()+"',"+
-                "plat_nomor='"+txt_plat.getText()+"',"+
-                "harga_sewa='"+txt_harga.getText()+"',"+
-                "status='"+combo_status.getSelectedItem().toString()+"' "+
-                "WHERE id_motor='"+id+"'");
-       
-        data[0] = id;
-        data[1] = txt_merk.getText();
-        data[2] = txt_model.getText();
-        data[3] = txt_plat.getText();
-        data[4] = txt_harga.getText();
-        data[5] = combo_status.getSelectedItem().toString();
-        tableMode1.removeRow(row);
-        tableMode1.insertRow(row,data);
-        
-        membersihkan_teks();
-        nonaktif_teks();
-        btn_ubah.setEnabled(false);
-        btn_hapus.setEnabled(false);
-       
+       if (row < 0) {
+            JOptionPane.showMessageDialog(this, "Pilih data yang akan diubah.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String id = tableMode1.getValueAt(row, 0).toString();
+        String sql = "UPDATE motor SET merk=?, model=?, plat_nomor=?, harga_sewa=? WHERE id_motor=?";
+
+        try (Connection kon = DriverManager.getConnection(database, user, pass);
+             PreparedStatement pst = kon.prepareStatement(sql)) {
+
+            pst.setString(1, txt_merk.getText());
+            pst.setString(2, txt_model.getText());
+            pst.setString(3, txt_plat.getText());
+            pst.setDouble(4, Double.parseDouble(txt_harga.getText()));
+            pst.setInt(5, Integer.parseInt(id));
+
+            pst.executeUpdate();
+
+            JOptionPane.showMessageDialog(this, "Data Motor Berhasil Diubah!");
+
+            settableload();
+            membersihkan_teks();
+            nonaktif_teks();
+            btn_ubah.setEnabled(false);
+            btn_hapus.setEnabled(false);
+            btn_tambah.setEnabled(true);
+
         }
         catch (Exception ex)
         {
@@ -627,7 +606,6 @@ public class motor extends javax.swing.JFrame {
         String kategori = combo_kategori.getSelectedItem().toString();
         String kolom;
 
-        // Menentukan kolom database berdasarkan pilihan kategori
         switch (kategori) {
             case "Merk":
                 kolom = "m.merk";
@@ -639,14 +617,12 @@ public class motor extends javax.swing.JFrame {
                 kolom = "m.plat_nomor";
                 break;
             case "Status":
-                // Pencarian status perlu penanganan khusus
                 kolom = "status_sekarang"; 
                 break;
             default:
                 return;
         }
 
-        // Kueri dasar yang sama dengan status dinamis
         String baseSQL = "SELECT " +
                          "    m.id_motor, m.merk, m.model, m.plat_nomor, m.harga_sewa, " +
                          "    CASE WHEN s.id_sewa IS NOT NULL THEN 'Tidak Tersedia' ELSE 'Tersedia' END AS status_sekarang " +
@@ -654,13 +630,10 @@ public class motor extends javax.swing.JFrame {
                          "LEFT JOIN sewa s ON m.id_motor = s.id_motor AND s.status_sewa = 'aktif' AND CURDATE() BETWEEN DATE(s.tanggal_peminjaman) AND DATE(s.tanggal_kembali) " +
                          "GROUP BY m.id_motor ";
 
-        // Menambahkan kondisi pencarian
         String finalSQL;
         if (kolom.equals("status_sekarang")) {
-            // HAVING digunakan untuk memfilter hasil agregasi atau alias
             finalSQL = baseSQL + "HAVING status_sekarang LIKE ?";
         } else {
-            // WHERE digunakan untuk kolom asli
             finalSQL = baseSQL.replace("GROUP BY m.id_motor", "WHERE " + kolom + " LIKE ? GROUP BY m.id_motor");
         }
 
@@ -745,14 +718,12 @@ public class motor extends javax.swing.JFrame {
     private javax.swing.JButton btn_tampil;
     private javax.swing.JButton btn_ubah;
     private javax.swing.JComboBox combo_kategori;
-    private javax.swing.JComboBox combo_status;
     private javax.swing.JComboBox combo_urutkan;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
