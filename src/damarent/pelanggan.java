@@ -457,12 +457,40 @@ public class pelanggan extends javax.swing.JFrame {
 
     private void btn_simpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_simpanActionPerformed
         // TODO add your handling code here:
-        // TODO add your handling code here:
+        String nama = txt_nama_pelanggan.getText();
+        String nik = txt_nik.getText();
+        String noTelp = txt_notelp.getText();
+        String alamat = txt_alamat.getText();
+        
+        if (nama.isEmpty() || nik.isEmpty() || noTelp.isEmpty() || alamat.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Semua data harus diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (!nik.matches("[0-9]+")) {
+            JOptionPane.showMessageDialog(this, "NIK (No. KTP) hanya boleh berisi angka!", "Error Input", JOptionPane.ERROR_MESSAGE);
+            txt_nik.requestFocus(); 
+            return; 
+        }
+        if (!noTelp.matches("[0-9]+")) {
+            JOptionPane.showMessageDialog(this, "No Telepon hanya boleh berisi angka!", "Error Input", JOptionPane.ERROR_MESSAGE);
+            txt_notelp.requestFocus(); 
+            return; 
+        }
+        if (nama.matches("[0-9]+")) {
+            JOptionPane.showMessageDialog(this, "Hanya boleh berisikan huruf!", "Error Input", JOptionPane.ERROR_MESSAGE);
+            txt_nama_pelanggan.requestFocus();
+            return; 
+        }
+        if (alamat.matches("[0-9]+")) {
+            JOptionPane.showMessageDialog(this, "Hanya boleh berisikan huruf!", "Error Input", JOptionPane.ERROR_MESSAGE);
+            txt_alamat.requestFocus();
+            return; 
+        }
         if (txt_nama_pelanggan.getText().isEmpty())
         {
             JOptionPane.showMessageDialog(null,
                                           "Data tidak boleh kosong, silahkan dilengkapi");
-            // Set focus to the first empty field if possible
             txt_nama_pelanggan.requestFocus();
             
         }
@@ -604,25 +632,27 @@ public class pelanggan extends javax.swing.JFrame {
 
     private void btn_hapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_hapusActionPerformed
         // TODO add your handling code here:
-        JOptionPane.showConfirmDialog(null, "Apakah Anda yakin ingin menghapus data ini?", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
-
-        try
-        {
-            Class.forName(driver);
-            Connection kon = DriverManager.getConnection(database,user,pass);
-            Statement stt = kon.createStatement();
-            String SQL = "DELETE FROM `pelanggan`"
-                        + "WHERE "
-                        + "`id_pelanggan`='"+tableMode1.getValueAt(row, 0).toString()+"'";
-            stt.executeUpdate(SQL);
-            tableMode1.removeRow(row);
-            stt.close();
-            kon.close();
-            membersihkan_teks();
-        }
-        catch (Exception ex)
-        {
-            System.err.println(ex.getMessage());
+        int confirm = JOptionPane.showConfirmDialog(null, "Apakah Anda yakin ingin menghapus data ini?", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            try
+            {
+                Class.forName(driver);
+                Connection kon = DriverManager.getConnection(database,user,pass);
+                Statement stt = kon.createStatement();
+                String SQL = "DELETE FROM `pelanggan`"
+                            + "WHERE "
+                            + "`id_pelanggan`='"+tableMode1.getValueAt(row, 0).toString()+"'";
+                stt.executeUpdate(SQL);
+                tableMode1.removeRow(row);
+                stt.close();
+                kon.close();
+                membersihkan_teks();
+            }
+            catch (Exception ex)
+            {
+                System.err.println(ex.getMessage());
+            }
         }
     }//GEN-LAST:event_btn_hapusActionPerformed
 

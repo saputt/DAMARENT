@@ -422,7 +422,7 @@ public class selesai extends javax.swing.JFrame {
     }
      
     private double hitungDendaTelat(Timestamp tanggalTargetKembali, Date tanggalAktual, int jamAktual, int menitAktual, double dendaHarian) {
-        if (tanggalTargetKembali == null || tanggalAktual == null) {
+         if (tanggalTargetKembali == null || tanggalAktual == null) {
             return 0.0;
         }
 
@@ -438,8 +438,7 @@ public class selesai extends javax.swing.JFrame {
 
         if (calAktual.compareTo(calTarget) <= 0) {
             txt_rincian_denda.setText("Tepat Waktu");
-        }else {
-            txt_rincian_denda.setText("Terlambat");
+            return 0.0; 
         }
 
         long diffMillis = calAktual.getTimeInMillis() - calTarget.getTimeInMillis();
@@ -451,10 +450,11 @@ public class selesai extends javax.swing.JFrame {
         if (diffHours > 4) {
             long jumlahHariTelat = (long) Math.ceil(diffHours / 24.0);
             denda = jumlahHariTelat * dendaHarian;
+            txt_rincian_denda.setText("Telat " + jumlahHariTelat + " hari x Rp" + String.format("%,.0f", dendaHarian));
         } else {
             denda = diffHours * dendaPerJam;
+            txt_rincian_denda.setText("Denda telat " + diffHours + " jam x Rp" + String.format("%,.0f", dendaPerJam));
         }
-
 
         return denda;
     }

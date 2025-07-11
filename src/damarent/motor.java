@@ -493,11 +493,25 @@ public class motor extends javax.swing.JFrame {
 
     private void btn_simpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_simpanActionPerformed
         // TODO add your handling code here:
+        String harga = txt_harga.getText();
+        String merk = txt_merk.getText();
+        
         if (txt_merk.getText().isEmpty() || txt_plat.getText().isEmpty() || txt_harga.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Merk, Plat Nomor, dan Harga tidak boleh kosong!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
+        if (!harga.matches("[0-9]+")) {
+            JOptionPane.showMessageDialog(this, "harga hanya boleh berisi angka!", "Error Input", JOptionPane.ERROR_MESSAGE);
+            txt_harga.requestFocus(); 
+            txt_harga.setText("");
+            return; 
+        }
+        if (merk.matches("[0-9]+")) {
+            JOptionPane.showMessageDialog(this, "harga hanya boleh berisi huruf!", "Error Input", JOptionPane.ERROR_MESSAGE);
+            txt_merk.requestFocus(); 
+            txt_merk.setText("");
+            return; 
+        }
         String sql = "INSERT INTO motor (merk, model, plat_nomor, harga_sewa, status) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection kon = DriverManager.getConnection(database, user, pass);
@@ -529,23 +543,26 @@ public class motor extends javax.swing.JFrame {
 
     private void btn_hapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_hapusActionPerformed
         // TODO add your handling code here:
-        try (Connection kon = DriverManager.getConnection(database,user,pass);
-            Statement stt = kon.createStatement())
-        {
-            String id = tableMode1.getValueAt(row, 0).toString();
-            stt.executeUpdate("DELETE FROM motor WHERE id_motor='"+ id +"'");
-            tableMode1.removeRow(row);
-            
-            membersihkan_teks();
-            nonaktif_teks();
-            btn_ubah.setEnabled(false);
-            btn_hapus.setEnabled(false);
-        }
-        catch (Exception ex)
-        {
-            JOptionPane.showMessageDialog(null, ex.getMessage(),"error", JOptionPane.ERROR_MESSAGE);
-        }
+        int confirm = JOptionPane.showConfirmDialog(null, "Apakah Anda yakin ingin menghapus data ini?", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
         
+        if (confirm == JOptionPane.YES_OPTION) {
+            try (Connection kon = DriverManager.getConnection(database,user,pass);
+                Statement stt = kon.createStatement())
+            {
+                String id = tableMode1.getValueAt(row, 0).toString();
+                stt.executeUpdate("DELETE FROM motor WHERE id_motor='"+ id +"'");
+                tableMode1.removeRow(row);
+
+                membersihkan_teks();
+                nonaktif_teks();
+                btn_ubah.setEnabled(false);
+                btn_hapus.setEnabled(false);
+            }
+            catch (Exception ex)
+            {
+                JOptionPane.showMessageDialog(null, ex.getMessage(),"error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }//GEN-LAST:event_btn_hapusActionPerformed
 
     private void tabel_motorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabel_motorMouseClicked
