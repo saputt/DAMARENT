@@ -1037,27 +1037,30 @@ public class sewa extends javax.swing.JFrame {
             pst.setString(1, "%" + keyword + "%"); 
 
             try (ResultSet res = pst.executeQuery()) {
-                if (!res.isBeforeFirst()) { 
-                    JOptionPane.showMessageDialog(this, "Data tidak ditemukan.", "Informasi", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    while (res.next()) {
-                        Object[] rowData = {
-                            res.getInt("id_sewa"),
-                            res.getString("nama_pelanggan"),
-                            res.getString("merk"),
-                            res.getString("model"),
-                            res.getString("plat_nomor"),
-                            res.getTimestamp("tanggal_peminjaman"),
-                            res.getTimestamp("tanggal_kembali"),
-                            res.getDouble("harga_sewa"),
-                            res.getDouble("harga_sewa_awal"),
-                            res.getString("status_sewa")
-                        };
-                        tableMode1.addRow(rowData);
-                    }
+                boolean dataDitemukan = false;
+                while (res.next()) {
+                    Object[] rowData = {
+                        res.getInt("id_sewa"),
+                        res.getString("nama_pelanggan"),
+                        res.getString("merk"),
+                        res.getString("model"),
+                        res.getString("plat_nomor"),
+                        res.getTimestamp("tanggal_peminjaman"),
+                        res.getTimestamp("tanggal_kembali"),
+                        res.getDouble("harga_sewa"),
+                        res.getDouble("harga_sewa_awal"),
+                        res.getString("status_sewa")
+                    };
+                    tableMode1.addRow(rowData);
+                    dataDitemukan = true; 
+                }
+
+                if (!dataDitemukan) { 
+                    JOptionPane.showMessageDialog(this, "Data sewa tidak ditemukan untuk pencarian ini.", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+                    settableload(); 
+                    txt_cari.setText(""); 
                 }
             }
-
         }
         catch (Exception ex)
         {

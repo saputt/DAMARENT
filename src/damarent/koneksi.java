@@ -7,7 +7,6 @@
 package damarent;
 
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.Properties;
 import javax.swing.JOptionPane;
 
@@ -24,13 +23,8 @@ public class koneksi {
     public String SettingPanel(String nmPanel){
         try {
             mypanel = new Properties();
-            InputStream input = getClass().getClassLoader().getResourceAsStream("database.ini");
-            if (input == null) {
-                throw new RuntimeException("File database.ini TIDAK DITEMUKAN di dalam paket aplikasi (classpath). " +
-                                           "Pastikan ada di src/resources/ di proyek NetBeans Anda.");
-            }
-            mypanel.load(input);
-            input.close();
+            mypanel.load(new FileInputStream
+                    ("lib/database.ini")); 
             strNamePanel = mypanel.getProperty(nmPanel);
         }catch(Exception e) {
             JOptionPane.showMessageDialog(null,
