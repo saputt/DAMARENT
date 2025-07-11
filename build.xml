@@ -10,29 +10,22 @@
 <project name="damarent" default="default" basedir=".">
     <description>Builds, tests, and runs the project damarent.</description>
     <import file="nbproject/build-impl.xml"/>
-    
-    <target name="-post-jar" description="Creates a Fat Jar including all dependencies.">
-        <property name="lib.dir" location="lib"/>
-        <property name="main.jar.name" value="damarent.jar"/> <property name="main.jar.path" location="${dist.dir}/${main.jar.name}"/>
 
-        <property name="fat.jar.name" value="Damarent_Fat.jar"/>
-        <property name="fat.jar.path" location="${dist.dir}/${fat.jar.name}"/>
+    <target name="-post-jar">
+        <echo message="Adding resources to the main JAR..."/>
+        <property name="main.jar" location="${dist.jar}"/>
+        <property name="src.resources.dir" location="${src.dir}/resources"/>
 
-        <property name="main.class" value="damarent.Damarent"/>
+        <available file="${src.resources.dir}" type="dir" property="src.resources.available"/>
 
-        <echo message="Creating Fat Jar: ${fat.jar.name} ..."/>
+        <antcall target="-do-add-resources-to-jar" />
+    </target>
 
-        <jar destfile="${fat.jar.path}">
-            <zipfileset src="${main.jar.path}"/>
-
-            <zipgroupfileset dir="${lib.dir}" includes="*.jar"/>
-
-            <manifest>
-                <attribute name="Main-Class" value="${main.class}"/>
-                <attribute name="Built-By" value="${user.name}"/>
-            </manifest>
-        </jar>
-        <echo message="Fat Jar created successfully at ${fat.jar.path}"/>
+    <target name="-do-add-resources-to-jar" if="src.resources.available">
+         <jar destfile="${main.jar}" update="true">
+             <fileset dir="${src.resources.dir}"/>
+         </jar>
+         <echo message="Resources from ${src.resources.dir} added to ${main.jar}"/>
     </target>
 
 </project>
