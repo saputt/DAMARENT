@@ -596,8 +596,8 @@ public class pelanggan extends javax.swing.JFrame {
             String SQL = "SELECT * FROM pelanggan WHERE " + kategorisql + " LIKE '%" + cari + "%'";;
            
             ResultSet res = stt.executeQuery(SQL);
-            while(res.next())
-            {
+            boolean dataDitemukan = false; 
+            while(res.next()) {
                 Object[] data = new Object[5];
                 data[0] = res.getString(1);
                 data[1] = res.getString(2);
@@ -605,7 +605,14 @@ public class pelanggan extends javax.swing.JFrame {
                 data[3] = res.getString(4);
                 data[4] = res.getString(5);
                 tableMode1.addRow(data);
-            } 
+                dataDitemukan = true; 
+            }
+            
+            if (!dataDitemukan) { 
+                JOptionPane.showMessageDialog(this, "Data pelanggan tidak ditemukan untuk pencarian ini.", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+                settableload(); 
+                txt_cari.setText(""); 
+            }
             res.close();
             stt.close();
             kon.close();

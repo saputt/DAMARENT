@@ -1,0 +1,2 @@
+DBUsername = oD54h34TVtAjREe.root
+DBPassword = InTdR59zdHsrHMLr

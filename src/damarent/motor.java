@@ -645,7 +645,6 @@ public class motor extends javax.swing.JFrame {
         if (kolom.equals("status_sekarang")) {
             finalSQL = baseSQL + "GROUP BY m.id_motor, m.merk, m.model, m.plat_nomor, m.harga_sewa HAVING status_sekarang LIKE ?";
         } else {
-            // Tambahkan GROUP BY ke klausa WHERE juga
             finalSQL = baseSQL + "WHERE " + kolom + " LIKE ? GROUP BY m.id_motor, m.merk, m.model, m.plat_nomor, m.harga_sewa";
         }
 
@@ -654,15 +653,21 @@ public class motor extends javax.swing.JFrame {
 
             pst.setString(1, "%" + kata + "%");
             ResultSet res = pst.executeQuery();
-
-            while (res.next()) {
-                data[0] = res.getString("id_motor");
-                data[1] = res.getString("merk");
-                data[2] = res.getString("model");
-                data[3] = res.getString("plat_nomor");
-                data[4] = res.getString("harga_sewa");
-                data[5] = res.getString("status_sekarang");
-                tableMode1.addRow(data);
+            
+            if (!res.isBeforeFirst()) { 
+                JOptionPane.showMessageDialog(this, "Data motor tidak ditemukan untuk pencarian ini.", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+                settableload(); 
+                txt_cari.setText(""); 
+            } else {
+                while (res.next()) {
+                    data[0] = res.getString("id_motor");
+                    data[1] = res.getString("merk");
+                    data[2] = res.getString("model");
+                    data[3] = res.getString("plat_nomor");
+                    data[4] = res.getString("harga_sewa");
+                    data[5] = res.getString("status_sekarang");
+                    tableMode1.addRow(data);
+                }
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
