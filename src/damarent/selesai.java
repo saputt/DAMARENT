@@ -422,7 +422,7 @@ public class selesai extends javax.swing.JFrame {
     }
      
     private double hitungDendaTelat(Timestamp tanggalTargetKembali, Date tanggalAktual, int jamAktual, int menitAktual, double dendaHarian) {
-        if (tanggalTargetKembali == null || tanggalAktual == null) {
+         if (tanggalTargetKembali == null || tanggalAktual == null) {
             return 0.0;
         }
 
@@ -438,8 +438,7 @@ public class selesai extends javax.swing.JFrame {
 
         if (calAktual.compareTo(calTarget) <= 0) {
             txt_rincian_denda.setText("Tepat Waktu");
-        }else {
-            txt_rincian_denda.setText("Terlambat");
+            return 0.0; 
         }
 
         long diffMillis = calAktual.getTimeInMillis() - calTarget.getTimeInMillis();
@@ -451,10 +450,11 @@ public class selesai extends javax.swing.JFrame {
         if (diffHours > 4) {
             long jumlahHariTelat = (long) Math.ceil(diffHours / 24.0);
             denda = jumlahHariTelat * dendaHarian;
+            txt_rincian_denda.setText("Telat " + jumlahHariTelat + " hari x Rp" + String.format("%,.0f", dendaHarian));
         } else {
             denda = diffHours * dendaPerJam;
+            txt_rincian_denda.setText("Denda telat " + diffHours + " jam x Rp" + String.format("%,.0f", dendaPerJam));
         }
-
 
         return denda;
     }
@@ -958,13 +958,13 @@ public class selesai extends javax.swing.JFrame {
                                     .addComponent(jLabel5)
                                     .addComponent(jLabel11))
                                 .addGap(3, 3, 3)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(menit_dikembalikan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jam_dikembalikan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(tanggal_dikembalikan, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(tanggal_dikembalikan, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(menit_dikembalikan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jam_dikembalikan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(combo_kategori, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1388,8 +1388,6 @@ public class selesai extends javax.swing.JFrame {
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
         // TODO add your handling code here:
-        menu_utama utama = new menu_utama();
-        utama.setVisible(true);
     }//GEN-LAST:event_formWindowClosed
 
     private void table_selesaiMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_table_selesaiMouseClicked
