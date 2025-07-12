@@ -66,38 +66,34 @@ public class sewa extends javax.swing.JFrame {
     }
     
     private javax.swing.table.DefaultTableModel tableMode1=getDefaultTabelModel();
-    private javax.swing.table.DefaultTableModel getDefaultTabelModel()
-    {
-        return new javax.swing.table.DefaultTableModel
-        (
-            new Object[][] {},
-            new String [] 
-            {
-                "ID Sewa",
-                "ID Plggn",
-                "Nama", 
-                "Merk", 
-                "Model",   
-                "No Plat",   
-                "Tggl Peminjaman",
-                "Tggl Kembali",  
-                "Hrga Sewa/Hri",
-                "Hrga Sewa Awl",
-                "Status",
-            }
-        )
-        
-        {
-            boolean[] canEdit = new boolean[]
-            {
-                 false, false, false, false, false, false, false, false, false, false         
-            };
-            public boolean isCellEditable(int rowIndex, int columnIndex) 
-            {
-                return canEdit[columnIndex];
-            }
+    private javax.swing.table.DefaultTableModel getDefaultTabelModel() {
+    return new javax.swing.table.DefaultTableModel(
+        new Object[][] {},
+        new String[] {
+            "ID Sewa",
+            "ID Plggn",
+            "ID Motor", 
+            "Nama",
+            "Merk",
+            "Model",
+            "No Plat",
+            "Tggl Peminjaman",
+            "Tggl Kembali",
+            "Hrga Sewa/Hri",
+            "Hrga Sewa Awl",
+            "Status"
+        }
+    ) {
+        boolean[] canEdit = new boolean[] {
+            false, false, false, false, false, false, false, false, false, false, false, false
         };
-    }
+
+        @Override
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return canEdit[columnIndex];
+        }
+    };
+}
     
     private void settableload()
     {
@@ -109,6 +105,7 @@ public class sewa extends javax.swing.JFrame {
             String SQL = "SELECT " +
                          "    s.id_sewa, " +
                          "    p.id_pelanggan, " +
+                         "    s.id_motor, " + 
                          "    p.nama_pelanggan, " +
                          "    m.merk, " +
                          "    m.model, " +
@@ -118,40 +115,34 @@ public class sewa extends javax.swing.JFrame {
                          "    m.harga_sewa, " +
                          "    s.harga_sewa_awal, " +
                          "    s.status_sewa " +
-                         "FROM " +
-                         "    sewa s " +
-                         "JOIN " +
-                         "    pelanggan p ON s.id_pelanggan = p.id_pelanggan " +
-                         "JOIN " +
-                         "    motor m ON s.id_motor = m.id_motor " +
-                         "ORDER BY " +
-                         "    s.tanggal_peminjaman DESC";
+                         "FROM sewa s " +
+                         "JOIN pelanggan p ON s.id_pelanggan = p.id_pelanggan " +
+                         "JOIN motor m ON s.id_motor = m.id_motor " +
+                         "ORDER BY s.tanggal_peminjaman DESC";
 
             ResultSet res = stt.executeQuery(SQL);
 
             while (res.next()) {
-                Object[] data = new Object[11];
+                Object[] data = new Object[12];
 
                 data[0] = res.getInt("id_sewa");
                 data[1] = res.getInt("id_pelanggan");
-                data[2] = res.getString("nama_pelanggan");
-                data[3] = res.getString("merk");
-                data[4] = res.getString("model");
-                data[5] = res.getString("plat_nomor");
-                data[6] = res.getTimestamp("tanggal_peminjaman");
-                data[7] = res.getTimestamp("tanggal_kembali");
-                data[8] = res.getDouble("harga_sewa");
-                data[9] = res.getDouble("harga_sewa_awal");
-                data[10] = res.getString("status_sewa");
+                data[2] = res.getInt("id_motor"); 
+                data[3] = res.getString("nama_pelanggan");
+                data[4] = res.getString("merk");
+                data[5] = res.getString("model");
+                data[6] = res.getString("plat_nomor");
+                data[7] = res.getTimestamp("tanggal_peminjaman");
+                data[8] = res.getTimestamp("tanggal_kembali");
+                data[9] = res.getDouble("harga_sewa");
+                data[10] = res.getDouble("harga_sewa_awal");
+                data[11] = res.getString("status_sewa");
 
                 tableMode1.addRow(data);
             }
-        } catch(Exception ex){
+        } catch (Exception ex) {
             System.err.println(ex.getMessage());
-            JOptionPane.showMessageDialog(null,
-                        ex.getMessage(),"error",
-                        JOptionPane.INFORMATION_MESSAGE);
-            System.exit(0);
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "error", JOptionPane.INFORMATION_MESSAGE);
         }
     }
     
@@ -223,40 +214,54 @@ public class sewa extends javax.swing.JFrame {
         combo_motor.removeAllItems();
         motorMap.clear();
 
-        javax.swing.DefaultComboBoxModel<String> Model = new javax.swing.DefaultComboBoxModel<>();
+        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
 
-        try {
-            Class.forName(driver);
-            Connection kon = DriverManager.getConnection(database, user, pass);
-            Statement stt = kon.createStatement();
+        // Kueri untuk mendapatkan semua motor beserta status ketersediaan real-time
+        String sql = "SELECT " +
+                     "    m.id_motor, m.merk, m.model, m.plat_nomor, " +
+                     "    IF(s.id_motor IS NOT NULL, 'Tidak Tersedia', 'Tersedia') AS status_sekarang " +
+                     "FROM " +
+                     "    motor m " +
+                     "LEFT JOIN ( " +
+                     "    SELECT DISTINCT id_motor " +
+                     "    FROM sewa " +
+                     "    WHERE status_sewa = 'aktif' AND CURDATE() BETWEEN DATE(tanggal_peminjaman) AND DATE(tanggal_kembali) " +
+                     ") s ON m.id_motor = s.id_motor " +
+                     "ORDER BY m.merk, m.model ASC";
 
-            String SQL = "SELECT id_motor, merk, model, plat_nomor FROM motor ORDER BY merk, model ASC";
-            ResultSet res = stt.executeQuery(SQL);
+        try (Connection kon = DriverManager.getConnection(database, user, pass);
+             Statement stt = kon.createStatement();
+             ResultSet res = stt.executeQuery(sql)) {
 
             String defaultItemText = "Pilih Motor";
-            Model.addElement(defaultItemText);
-            motorMap.put(defaultItemText, 0); 
+            model.addElement(defaultItemText);
+            motorMap.put(defaultItemText, 0);
 
             while (res.next()) {
-                int id = res.getInt("id_motor");
-                String merk = res.getString("merk");
-                String modelMotor = res.getString("model");
-                String platNomor = res.getString("plat_nomor"); 
-             
-                String displayString = merk + " - " + modelMotor + " (" + platNomor + ")";
-           
-                Model.addElement(displayString); 
-                motorMap.put(displayString, id); 
+                String status = res.getString("status_sekarang");
+
+                // --- LOGIKA UTAMA ADA DI SINI ---
+                // Hanya tambahkan motor ke ComboBox jika statusnya "Tersedia"
+                if (status.equals("Tersedia")) {
+                    int id = res.getInt("id_motor");
+                    String merk = res.getString("merk");
+                    String modelMotor = res.getString("model");
+                    String platNomor = res.getString("plat_nomor");
+
+                    String displayString = merk + " - " + modelMotor + " (" + platNomor + ")";
+
+                    model.addElement(displayString);
+                    motorMap.put(displayString, id);
+                }
             }
 
-            combo_motor.setModel(Model); 
+            combo_motor.setModel(model);
 
-        }catch(Exception ex){
-            System.err.println(ex.getMessage());
-            JOptionPane.showMessageDialog(null,
-                        ex.getMessage(),"error",
-                        JOptionPane.INFORMATION_MESSAGE);
-            System.exit(0);
+        } catch (Exception ex) {
+            System.err.println("Gagal memuat data motor: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this,
+                "Gagal memuat daftar motor yang tersedia.", "Error",
+                JOptionPane.ERROR_MESSAGE);
         }
     }
     
@@ -264,33 +269,25 @@ public class sewa extends javax.swing.JFrame {
     private void tampil_field() {
         row = tabel_sewa.getSelectedRow();
         if (row == -1) {
-            return;
+            return; 
         }
 
         try {
             String idSewa = tableMode1.getValueAt(row, 0).toString();
             String idPelanggan = tableMode1.getValueAt(row, 1).toString();
-            String namaPelanggan = tableMode1.getValueAt(row, 2).toString();
-            String merkMotor = tableMode1.getValueAt(row, 3).toString();
-            String modelMotor = tableMode1.getValueAt(row, 4).toString();
-            String platNomor = tableMode1.getValueAt(row, 5).toString();
-            Timestamp tanggalPeminjaman = (Timestamp) tableMode1.getValueAt(row, 6);
-            Timestamp tanggalTargetKembali = (Timestamp) tableMode1.getValueAt(row, 7);
-
-            double hargaSewaHari = (Double) tableMode1.getValueAt(row, 8);
-
-            double hargaSewaAwal = (Double) tableMode1.getValueAt(row, 9);
-
-            String statusSewa = tableMode1.getValueAt(row, 10).toString();
-
-            int durasiHari = 0;
-            if (hargaSewaHari > 0) { 
-                durasiHari = (int) Math.round(hargaSewaAwal / hargaSewaHari);
-            }
+            int idMotor = (Integer) tableMode1.getValueAt(row, 2);
+            String namaPelanggan = tableMode1.getValueAt(row, 3).toString();
+            String merkMotor = tableMode1.getValueAt(row, 4).toString();
+            String modelMotor = tableMode1.getValueAt(row, 5).toString();
+            String platNomor = tableMode1.getValueAt(row, 6).toString();
+            Timestamp tanggalPeminjaman = (Timestamp) tableMode1.getValueAt(row, 7);
+            Timestamp tanggalTargetKembali = (Timestamp) tableMode1.getValueAt(row, 8);
+            double hargaSewaHari = (Double) tableMode1.getValueAt(row, 9);
+            double hargaSewaAwal = (Double) tableMode1.getValueAt(row, 10);
+            String statusSewa = tableMode1.getValueAt(row, 11).toString();
 
             if (tanggalPeminjaman != null) {
                 tanggal_diambil.setDate(new Date(tanggalPeminjaman.getTime()));
-
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(tanggalPeminjaman);
                 jam_diambil.setValue(cal.get(Calendar.HOUR_OF_DAY));
@@ -301,21 +298,25 @@ public class sewa extends javax.swing.JFrame {
                 menit_diambil.setValue(0);
             }
 
+            int durasiHari = 0;
+            if (hargaSewaHari > 0) {
+                durasiHari = (int) Math.round(hargaSewaAwal / hargaSewaHari);
+            }
             jumlah_hari.setValue(durasiHari);
 
             String displayPelanggan = idPelanggan + " - " + namaPelanggan;
-            if (((DefaultComboBoxModel)combo_penyewa.getModel()).getIndexOf(displayPelanggan) != -1) {
+            if (((DefaultComboBoxModel) combo_penyewa.getModel()).getIndexOf(displayPelanggan) != -1) {
                 combo_penyewa.setSelectedItem(displayPelanggan);
-            } else if (combo_penyewa.getItemCount() > 0) {
-                combo_penyewa.setSelectedIndex(0);
             }
 
             String displayMotor = merkMotor + " - " + modelMotor + " (" + platNomor + ")";
-            if (((DefaultComboBoxModel)combo_motor.getModel()).getIndexOf(displayMotor) != -1) {
-                combo_motor.setSelectedItem(displayMotor);
-            } else if (combo_motor.getItemCount() > 0) {
-                combo_motor.setSelectedIndex(0);
+            DefaultComboBoxModel<String> motorModel = (DefaultComboBoxModel<String>) combo_motor.getModel();
+
+            if (motorModel.getIndexOf(displayMotor) == -1) {
+                motorModel.addElement(displayMotor);
+                motorMap.put(displayMotor, idMotor); 
             }
+            combo_motor.setSelectedItem(displayMotor);
 
             aktifkan_teks();
             btn_ubah.setEnabled(true);
@@ -342,75 +343,51 @@ public class sewa extends javax.swing.JFrame {
     }
     
     private void sorting(){
-         // TODO add your handling code here:
-        String sort = (String) combo_sort.getSelectedItem();
         tableMode1.setRowCount(0);
-        String sortOrder = "";
-        if (sort=="Termurah") { 
-            sortOrder = "ASC";
-        } else if (sort=="Termahal") { 
-            sortOrder = "DESC";
+        String sort = (String) combo_sort.getSelectedItem();
+        String orderByClause = "s.harga_sewa_awal "; // Kolom default untuk diurutkan
+
+        if ("Termurah".equals(sort)) {
+            orderByClause += "ASC";
+        } else if ("Termahal".equals(sort)) {
+            orderByClause += "DESC";
         }
-        try
-        {
-            Class.forName(driver);
-            Connection kon = DriverManager.getConnection(
-                    database,
-                    user,
-                    pass
-            );
-            Statement stt=kon.createStatement();
+
+        try (Connection kon = DriverManager.getConnection(database, user, pass);
+             Statement stt = kon.createStatement()) {
 
             String SQL = "SELECT " +
-                     "    s.id_sewa, " +
-                     "    p.id_pelanggan, " +
-                     "    p.nama_pelanggan, " +
-                     "    m.merk, " +
-                     "    m.model, " +
-                     "    m.plat_nomor, " +
-                     "    s.tanggal_peminjaman, " +
-                     "    s.tanggal_kembali, " +
-                     "    m.harga_sewa, " + 
-                     "    s.harga_sewa_awal, " +
-                     "    s.status_sewa " +
-                     "FROM " +
-                     "    sewa s " +
-                     "JOIN " +
-                     "    pelanggan p ON s.id_pelanggan = p.id_pelanggan " +
-                     "JOIN " +
-                     "    motor m ON s.id_motor = m.id_motor " +
-                     "ORDER BY " +
-                     "    s.tanggal_peminjaman " + sortOrder;
-            
+                         "s.id_sewa, p.id_pelanggan, s.id_motor, p.nama_pelanggan, " +
+                         "m.merk, m.model, m.plat_nomor, s.tanggal_peminjaman, " +
+                         "s.tanggal_kembali, m.harga_sewa, s.harga_sewa_awal, s.status_sewa " +
+                         "FROM sewa s " +
+                         "JOIN pelanggan p ON s.id_pelanggan = p.id_pelanggan " +
+                         "JOIN motor m ON s.id_motor = m.id_motor " +
+                         "ORDER BY " + orderByClause;
+
             ResultSet res = stt.executeQuery(SQL);
-            while(res.next())
-            {
-                Object[] data = new Object[10];
-                data[0] = res.getString(1);
-                data[1] = res.getString(2);
-                data[2] = res.getString(3);
-                data[3] = res.getString(4);
-                data[4] = res.getString(5);
-                data[5] = res.getString(6);
-                data[6] = res.getString(7);
-                data[7] = res.getString(8);
-                data[8] = res.getString(9);
-                data[9] = res.getString(10);
-                data[9] = res.getString(10);
+
+            while (res.next()) {
+                Object[] data = new Object[12]; 
+
+                data[0] = res.getInt("id_sewa");
+                data[1] = res.getInt("id_pelanggan");
+                data[2] = res.getInt("id_motor");
+                data[3] = res.getString("nama_pelanggan");
+                data[4] = res.getString("merk");
+                data[5] = res.getString("model");
+                data[6] = res.getString("plat_nomor");
+                data[7] = res.getTimestamp("tanggal_peminjaman"); 
+                data[8] = res.getTimestamp("tanggal_kembali");     
+                data[9] = res.getDouble("harga_sewa");          
+                data[10] = res.getDouble("harga_sewa_awal");    
+                data[11] = res.getString("status_sewa");
 
                 tableMode1.addRow(data);
-            } 
-            res.close();
-            stt.close();
-            kon.close();
-        }
-        catch (Exception ex)
-        {
-            System.err.println(ex.getMessage());
-            JOptionPane.showMessageDialog(null,
-                    ex.getMessage(),"error",
-                    JOptionPane.INFORMATION_MESSAGE);
-            System.exit(0);
+            }
+        } catch (Exception ex) {
+            System.err.println("Error saat sorting: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "error", JOptionPane.INFORMATION_MESSAGE);
         }
     }
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -859,94 +836,64 @@ public class sewa extends javax.swing.JFrame {
         String idSewaToUpdate = tableMode1.getValueAt(row, 0).toString();
 
         Date tanggalPeminjamanDate = tanggal_diambil.getDate();
-        if (tanggalPeminjamanDate == null) {
-            JOptionPane.showMessageDialog(this, "Silakan pilih tanggal peminjaman.", "Peringatan", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
         int jam = (Integer) jam_diambil.getValue();
         int menit = (Integer) menit_diambil.getValue();
         int jumlahHari = (Integer) jumlah_hari.getValue();
-
         Calendar calPeminjaman = Calendar.getInstance();
         calPeminjaman.setTime(tanggalPeminjamanDate);
         calPeminjaman.set(Calendar.HOUR_OF_DAY, jam);
         calPeminjaman.set(Calendar.MINUTE, menit);
-        calPeminjaman.set(Calendar.SECOND, 0);
-        calPeminjaman.set(Calendar.MILLISECOND, 0);
         java.sql.Timestamp tanggalPeminjamanTimestamp = new java.sql.Timestamp(calPeminjaman.getTimeInMillis());
-
         Calendar calTargetKembali = (Calendar) calPeminjaman.clone();
         calTargetKembali.add(Calendar.DAY_OF_YEAR, jumlahHari);
         java.sql.Timestamp tanggalTargetKembaliTimestamp = new java.sql.Timestamp(calTargetKembali.getTimeInMillis());
 
         String selectedPelangganDisplay = (String) combo_penyewa.getSelectedItem();
-        if (selectedPelangganDisplay == null || selectedPelangganDisplay.equals("Pilih Pelanggan")) {
-            JOptionPane.showMessageDialog(this, "Silakan pilih pelanggan.", "Peringatan", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
         int idPelanggan = penggunaMap.get(selectedPelangganDisplay);
 
-        String selectedMotorDisplay = (String) combo_motor.getSelectedItem();
-        if (selectedMotorDisplay == null || selectedMotorDisplay.equals("Pilih Motor")) {
-            JOptionPane.showMessageDialog(this, "Silakan pilih motor.", "Peringatan", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        int idMotor = motorMap.get(selectedMotorDisplay);
-
+        int idMotor = (Integer) tableMode1.getValueAt(row, 2); 
+        String statusSewaSaatIni = tableMode1.getValueAt(row, 11).toString();
 
         double hargaSewaPerHari = 0.0;
-        Connection konTemp = null;
-        Statement sttTemp = null;
-        try {
-            Class.forName(driver);
-            konTemp = DriverManager.getConnection(database, user, pass);
-            sttTemp = konTemp.createStatement();
+        try (Connection kon = DriverManager.getConnection(database, user, pass);
+             Statement stt = kon.createStatement()) {
             String sqlHargaMotor = "SELECT harga_sewa FROM motor WHERE id_motor = " + idMotor;
-            ResultSet rsHarga = sttTemp.executeQuery(sqlHargaMotor);
+            ResultSet rsHarga = stt.executeQuery(sqlHargaMotor);
             if (rsHarga.next()) {
                 hargaSewaPerHari = rsHarga.getDouble("harga_sewa");
             }
-            rsHarga.close();
-        }catch (Exception ex){
-            System.err.println(ex.getMessage());
+        } catch (Exception ex) {
+            System.err.println("Gagal mengambil harga motor: " + ex.getMessage());
         }
         double biayaSewaAwal = hargaSewaPerHari * jumlahHari;
 
-        java.sql.PreparedStatement pst = null;
-        try {
-            Class.forName(driver);
-            Connection kon = DriverManager.getConnection(database, user, pass);
-            String SQL_UPDATE = "UPDATE sewa SET " +
-                                "`id_pelanggan`=?, " +
-                                "`id_motor`=?, " +
-                                "`tanggal_peminjaman`=?, " +
-                                "`tanggal_kembali`=?, " +
-                                "`harga_sewa_awal`=?, " +             
-                                "`status_sewa`=? " +
-                                "WHERE `id_sewa`=?";
+        String SQL_UPDATE = "UPDATE sewa SET id_pelanggan=?, id_motor=?, tanggal_peminjaman=?, tanggal_kembali=?, harga_sewa_awal=?, status_sewa=? WHERE id_sewa=?";
 
-            pst = kon.prepareStatement(SQL_UPDATE);
+        try (Connection kon = DriverManager.getConnection(database, user, pass);
+             PreparedStatement pst = kon.prepareStatement(SQL_UPDATE)) {
+
             pst.setInt(1, idPelanggan);
-            pst.setInt(2, idMotor);
+            pst.setInt(2, idMotor); 
             pst.setTimestamp(3, tanggalPeminjamanTimestamp);
             pst.setTimestamp(4, tanggalTargetKembaliTimestamp);
             pst.setDouble(5, biayaSewaAwal);
-            pst.setString(6, idSewaToUpdate);
+            pst.setString(6, statusSewaSaatIni); 
+            pst.setInt(7, Integer.parseInt(idSewaToUpdate));
 
             int rowsAffected = pst.executeUpdate();
 
             if (rowsAffected > 0) {
                 JOptionPane.showMessageDialog(this, "Data sewa berhasil diubah!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-                settableload(); 
-                membersihkan_teks(); 
-                nonaktif_teks(); 
+                settableload();
+                membersihkan_teks();
+                nonaktif_teks();
             } else {
-                JOptionPane.showMessageDialog(this, "Gagal mengubah data sewa. ID Sewa tidak ditemukan atau tidak ada perubahan.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Gagal mengubah data sewa.", "Error", JOptionPane.ERROR_MESSAGE);
             }
 
-        } catch (Exception ex){
-            System.err.println(ex.getMessage());
+        } catch (Exception ex) {
+            System.err.println("Error saat mengubah data: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }//GEN-LAST:event_btn_ubahActionPerformed
 
@@ -958,7 +905,7 @@ public class sewa extends javax.swing.JFrame {
 
         String idSewaToDelete = tableMode1.getValueAt(row, 0).toString();
 
-        int confirm = JOptionPane.showConfirmDialog(null, "Apakah Anda yakin ingin menghapus data sewa ini? \n(Semua denda terkait juga akan dihapus).", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
+        int confirm = JOptionPane.showConfirmDialog(null, "Apakah Anda yakin ingin menghapus data sewa ini?.", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             try {
