@@ -954,19 +954,19 @@ public class sewa extends javax.swing.JFrame {
 
         switch (kategori) {
             case "Nama":
-                searchColumn = "pelanggan.nama_pelanggan";
+                searchColumn = "p.nama_pelanggan";
                 break;
             case "Merk Motor":
-                searchColumn = "motor.merk";
+                searchColumn = "m.merk";
                 break;
             case "Model Motor":
-                searchColumn = "motor.model";
+                searchColumn = "m.model";
                 break;
             case "Plat Nomor":
-                searchColumn = "motor.plat_nomor";
+                searchColumn = "m.plat_nomor";
                 break;
             case "Status Sewa":
-                searchColumn = "sewa.status_sewa";
+                searchColumn = "s.status_sewa";
                 break;
             default:
                 JOptionPane.showMessageDialog(this, "Kategori pencarian tidak valid.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -974,24 +974,28 @@ public class sewa extends javax.swing.JFrame {
         }
 
         String sql = "SELECT " +
-                 "  sewa.id_sewa, pelanggan.nama_pelanggan, motor.merk, motor.model, motor.plat_nomor, " +
-                 "  sewa.tanggal_peminjaman, sewa.tanggal_kembali, motor.harga_sewa, " +
-                 "  sewa.harga_sewa_awal, sewa.status_sewa " +
-                 "FROM sewa " +
-                 "JOIN pelanggan ON sewa.id_pelanggan = pelanggan.id_pelanggan " +
-                 "JOIN motor ON sewa.id_motor = motor.id_motor " +
-                 "WHERE " + searchColumn + " LIKE ?";
+                     "s.id_sewa, p.id_pelanggan, s.id_motor, p.nama_pelanggan, " +
+                     "m.merk, m.model, m.plat_nomor, s.tanggal_peminjaman, " +
+                     "s.tanggal_kembali, m.harga_sewa, s.harga_sewa_awal, s.status_sewa " +
+                     "FROM sewa s " +
+                     "JOIN pelanggan p ON s.id_pelanggan = p.id_pelanggan " +
+                     "JOIN motor m ON s.id_motor = m.id_motor " +
+                     "WHERE " + searchColumn + " LIKE ?";
 
         try (Connection kon = DriverManager.getConnection(database, user, pass);
              PreparedStatement pst = kon.prepareStatement(sql)) {
 
-            pst.setString(1, "%" + keyword + "%"); 
+            pst.setString(1, "%" + keyword + "%");
 
             try (ResultSet res = pst.executeQuery()) {
                 boolean dataDitemukan = false;
                 while (res.next()) {
+                    dataDitemukan = true;
+
                     Object[] rowData = {
                         res.getInt("id_sewa"),
+                        res.getInt("id_pelanggan"),
+                        res.getInt("id_motor"),
                         res.getString("nama_pelanggan"),
                         res.getString("merk"),
                         res.getString("model"),
@@ -1003,23 +1007,15 @@ public class sewa extends javax.swing.JFrame {
                         res.getString("status_sewa")
                     };
                     tableMode1.addRow(rowData);
-                    dataDitemukan = true; 
                 }
 
-                if (!dataDitemukan) { 
+                if (!dataDitemukan) {
                     JOptionPane.showMessageDialog(this, "Data sewa tidak ditemukan untuk pencarian ini.", "Informasi", JOptionPane.INFORMATION_MESSAGE);
-                    settableload(); 
-                    txt_cari.setText(""); 
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            System.err.println(ex.getMessage());
-            JOptionPane.showMessageDialog(null,
-                    ex.getMessage(),"error",
-                    JOptionPane.INFORMATION_MESSAGE);
-            System.exit(0);
+        } catch (Exception ex) {
+            System.err.println("Error saat mencari data: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btn_cariActionPerformed
 
