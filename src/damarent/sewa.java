@@ -353,19 +353,18 @@ public class sewa extends javax.swing.JFrame {
             orderByClause += "DESC";
         }
 
+        String SQL = "SELECT " +
+                     "s.id_sewa, p.id_pelanggan, s.id_motor, p.nama_pelanggan, " +
+                     "m.merk, m.model, m.plat_nomor, s.tanggal_peminjaman, " +
+                     "s.tanggal_kembali, m.harga_sewa, s.harga_sewa_awal, s.status_sewa " +
+                     "FROM sewa s " +
+                     "JOIN pelanggan p ON s.id_pelanggan = p.id_pelanggan " +
+                     "JOIN motor m ON s.id_motor = m.id_motor " +
+                     "ORDER BY " + orderByClause;
+
         try (Connection kon = DriverManager.getConnection(database, user, pass);
-             Statement stt = kon.createStatement()) {
-
-            String SQL = "SELECT " +
-                         "s.id_sewa, p.id_pelanggan, s.id_motor, p.nama_pelanggan, " +
-                         "m.merk, m.model, m.plat_nomor, s.tanggal_peminjaman, " +
-                         "s.tanggal_kembali, m.harga_sewa, s.harga_sewa_awal, s.status_sewa " +
-                         "FROM sewa s " +
-                         "JOIN pelanggan p ON s.id_pelanggan = p.id_pelanggan " +
-                         "JOIN motor m ON s.id_motor = m.id_motor " +
-                         "ORDER BY " + orderByClause;
-
-            ResultSet res = stt.executeQuery(SQL);
+             Statement stt = kon.createStatement();
+             ResultSet res = stt.executeQuery(SQL)) {
 
             while (res.next()) {
                 Object[] data = new Object[12]; 
@@ -379,7 +378,7 @@ public class sewa extends javax.swing.JFrame {
                 data[6] = res.getString("plat_nomor");
                 data[7] = res.getTimestamp("tanggal_peminjaman"); 
                 data[8] = res.getTimestamp("tanggal_kembali");     
-                data[9] = res.getDouble("harga_sewa");          
+                data[9] = res.getDouble("harga_sewa");           
                 data[10] = res.getDouble("harga_sewa_awal");    
                 data[11] = res.getString("status_sewa");
 
@@ -584,7 +583,7 @@ public class sewa extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jLabel8)
+                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txt_cari)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -594,7 +593,7 @@ public class sewa extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btn_tampil_semua, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(678, 678, 678)
-                        .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
+                        .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(combo_sort, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -706,8 +705,8 @@ public class sewa extends javax.swing.JFrame {
                             .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 318, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

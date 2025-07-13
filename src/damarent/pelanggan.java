@@ -8,6 +8,7 @@ package damarent;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import javax.swing.JOptionPane;
@@ -436,7 +437,7 @@ public class pelanggan extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 7, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 316, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -565,7 +566,7 @@ public class pelanggan extends javax.swing.JFrame {
 
     private void btn_cariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_cariActionPerformed
         // TODO add your handling code here:
-        String cari = txt_cari.getText().toUpperCase();
+        String cari = txt_cari.getText();
         if(cari.isEmpty())
         {
             JOptionPane.showMessageDialog(null, "Data tidak boleh ksoong, silahkan ulangi..");
@@ -643,26 +644,56 @@ public class pelanggan extends javax.swing.JFrame {
 
     private void btn_hapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_hapusActionPerformed
         // TODO add your handling code here:
-        int confirm = JOptionPane.showConfirmDialog(null, "Apakah Anda yakin ingin menghapus data ini?", "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
-        
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "Pilih data pelanggan yang akan dihapus.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Apakah Anda yakin ingin menghapus data pelanggan ini?",
+                "Konfirmasi Hapus",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
         if (confirm == JOptionPane.YES_OPTION) {
-            try
-            {
-                Class.forName(driver);
-                Connection kon = DriverManager.getConnection(database,user,pass);
-                Statement stt = kon.createStatement();
-                String SQL = "DELETE FROM `pelanggan`"
-                            + "WHERE "
-                            + "`id_pelanggan`='"+tableMode1.getValueAt(row, 0).toString()+"'";
-                stt.executeUpdate(SQL);
-                tableMode1.removeRow(row);
-                stt.close();
-                kon.close();
-                membersihkan_teks();
-            }
-            catch (Exception ex)
-            {
-                System.err.println(ex.getMessage());
+            String idPelanggan = tableMode1.getValueAt(row, 0).toString();
+
+            try (Connection kon = DriverManager.getConnection(database, user, pass)) {
+
+                String sqlCheck = "SELECT COUNT(*) FROM sewa WHERE id_pelanggan = ?";
+                int jumlahSewa = 0;
+
+                try (PreparedStatement pstCheck = kon.prepareStatement(sqlCheck)) {
+                    pstCheck.setString(1, idPelanggan);
+                    ResultSet rs = pstCheck.executeQuery();
+                    if (rs.next()) {
+                        jumlahSewa = rs.getInt(1);
+                    }
+                }
+
+                if (jumlahSewa > 0) {
+                    JOptionPane.showMessageDialog(this,
+                            "Gagal menghapus! Pelanggan ini memiliki " + jumlahSewa + " riwayat transaksi sewa.",
+                            "Error Foreign Key",
+                            JOptionPane.ERROR_MESSAGE);
+                } else {
+                    String sqlDelete = "DELETE FROM pelanggan WHERE id_pelanggan = ?";
+                    try (PreparedStatement pstDelete = kon.prepareStatement(sqlDelete)) {
+                        pstDelete.setString(1, idPelanggan);
+                        int rowsAffected = pstDelete.executeUpdate();
+
+                        if (rowsAffected > 0) {
+                            JOptionPane.showMessageDialog(this, "Data pelanggan berhasil dihapus!");
+                            tableMode1.removeRow(row);
+                            membersihkan_teks();
+                            nonaktif_teks();
+                        }
+                    }
+                }
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Terjadi kesalahan database: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
             }
         }
     }//GEN-LAST:event_btn_hapusActionPerformed

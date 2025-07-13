@@ -974,7 +974,7 @@ public class selesai extends javax.swing.JFrame {
                     .addComponent(btn_tampil, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator5, javax.swing.GroupLayout.PREFERRED_SIZE, 7, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1210,118 +1210,138 @@ public class selesai extends javax.swing.JFrame {
     }//GEN-LAST:event_btn_batalActionPerformed
 
     private void btn_simpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_simpanActionPerformed
-        String selectedDisplayString = (String) combo_penyewa.getSelectedItem();
-        int idSewa = 0;
-        if (selectedDisplayString != null && sewaAktifMap.containsKey(selectedDisplayString)) {
-            idSewa = sewaAktifMap.get(selectedDisplayString);
+        String jumlahBayar = txt_jumlah_bayar.getText();
+        String jumlahDendaTambahan = txt_jumlah_denda2.getText();
+        Boolean lanjut = false;
+        if (!jumlahBayar.matches("[0-9]+")) {
+            JOptionPane.showMessageDialog(this, "harga hanya boleh berisi angka!", "Error Input", JOptionPane.ERROR_MESSAGE);
+            txt_jumlah_bayar.requestFocus(); 
+            txt_jumlah_bayar.setText("");
+            lanjut = true;
+            return; 
         }
-        if (idSewa <= 0) {
-            JOptionPane.showMessageDialog(this, "Pilih data sewa aktif yang ingin diselesaikan.", "Kesalahan Input", JOptionPane.ERROR_MESSAGE);
-            return;
+        if (!jumlahDendaTambahan.matches("[0-9]+")) {
+            JOptionPane.showMessageDialog(this, "harga hanya boleh berisi angka!", "Error Input", JOptionPane.ERROR_MESSAGE);
+            txt_jumlah_denda2.requestFocus(); 
+            txt_jumlah_denda2.setText("");
+            lanjut = true;
+            return; 
         }
-
-        Date tglKembaliActualDate = tanggal_dikembalikan.getDate();
-        if (tglKembaliActualDate == null) {
-            JOptionPane.showMessageDialog(this, "Tanggal kembali aktual tidak boleh kosong.", "Kesalahan Input", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        Calendar calAktual = Calendar.getInstance();
-        calAktual.setTime(tglKembaliActualDate);
-        calAktual.set(Calendar.HOUR_OF_DAY, (Integer) jam_dikembalikan.getValue());
-        calAktual.set(Calendar.MINUTE, (Integer) menit_dikembalikan.getValue());
-        calAktual.set(Calendar.SECOND, 0);
-        calAktual.set(Calendar.MILLISECOND, 0);
-        Timestamp tanggalKembaliAktual = new Timestamp(calAktual.getTimeInMillis());
-
-        double totalDenda = 0.0;
-        double jumlahSudahDibayar = 0.0;
-        double totalBiaya = 0.0;
-        String rincianDenda = txt_rincian_denda.getText().trim(); // Ambil dari field yang sudah digenerate
-        String statusPembayaran = "";
-        long jumlahJamTelat = 0; 
-
-        try {
-            totalDenda = Double.parseDouble(txt_jumlah_denda.getText().replace(",", ".")); 
-            jumlahSudahDibayar = Double.parseDouble(txt_jumlah_bayar.getText().replace(",", "."));
-            totalBiaya = Double.parseDouble(txt_total_bayar.getText().replace(",", "."));
-
-            if (jumlahSudahDibayar >= totalBiaya) {
-                statusPembayaran = "Lunas";
-            } else if (jumlahSudahDibayar > 0 && jumlahSudahDibayar < totalBiaya) {
-                statusPembayaran = "Belum Lunas";
-            } else { 
-                statusPembayaran = "Belum Bayar";
+        
+        if(lanjut) {
+            String selectedDisplayString = (String) combo_penyewa.getSelectedItem();
+            int idSewa = 0;
+            if (selectedDisplayString != null && sewaAktifMap.containsKey(selectedDisplayString)) {
+                idSewa = sewaAktifMap.get(selectedDisplayString);
             }
-            
-            Timestamp tanggalTargetKembali = sewaTargetKembaliMap.get(idSewa);
-            if (tglKembaliActualDate != null && tanggalTargetKembali != null) {
-                Calendar targetCal = Calendar.getInstance();
-                targetCal.setTimeInMillis(tanggalTargetKembali.getTime());
+            if (idSewa <= 0) {
+                JOptionPane.showMessageDialog(this, "Pilih data sewa aktif yang ingin diselesaikan.", "Kesalahan Input", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-                Calendar currentActualCal = Calendar.getInstance();
-                currentActualCal.setTime(tglKembaliActualDate);
-                currentActualCal.set(Calendar.HOUR_OF_DAY, (Integer) jam_dikembalikan.getValue());
-                currentActualCal.set(Calendar.MINUTE, (Integer) menit_dikembalikan.getValue());
-                currentActualCal.set(Calendar.SECOND, 0);
-                currentActualCal.set(Calendar.MILLISECOND, 0);
+            Date tglKembaliActualDate = tanggal_dikembalikan.getDate();
+            if (tglKembaliActualDate == null) {
+                JOptionPane.showMessageDialog(this, "Tanggal kembali aktual tidak boleh kosong.", "Kesalahan Input", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-                if (currentActualCal.compareTo(targetCal) > 0) {
-                    long diffMillis = currentActualCal.getTimeInMillis() - targetCal.getTimeInMillis();
-                    jumlahJamTelat = (long) Math.ceil((double)diffMillis / (1000.0 * 60 * 60));
+            Calendar calAktual = Calendar.getInstance();
+            calAktual.setTime(tglKembaliActualDate);
+            calAktual.set(Calendar.HOUR_OF_DAY, (Integer) jam_dikembalikan.getValue());
+            calAktual.set(Calendar.MINUTE, (Integer) menit_dikembalikan.getValue());
+            calAktual.set(Calendar.SECOND, 0);
+            calAktual.set(Calendar.MILLISECOND, 0);
+            Timestamp tanggalKembaliAktual = new Timestamp(calAktual.getTimeInMillis());
+
+            double totalDenda = 0.0;
+            double jumlahSudahDibayar = 0.0;
+            double totalBiaya = 0.0;
+            String rincianDenda = txt_rincian_denda.getText().trim(); // Ambil dari field yang sudah digenerate
+            String statusPembayaran = "";
+            long jumlahJamTelat = 0; 
+
+            try {
+                totalDenda = Double.parseDouble(txt_jumlah_denda.getText().replace(",", ".")); 
+                jumlahSudahDibayar = Double.parseDouble(txt_jumlah_bayar.getText().replace(",", "."));
+                totalBiaya = Double.parseDouble(txt_total_bayar.getText().replace(",", "."));
+
+                if (jumlahSudahDibayar >= totalBiaya) {
+                    statusPembayaran = "Lunas";
+                } else if (jumlahSudahDibayar > 0 && jumlahSudahDibayar < totalBiaya) {
+                    statusPembayaran = "Belum Lunas";
+                } else { 
+                    statusPembayaran = "Belum Bayar";
                 }
+
+                Timestamp tanggalTargetKembali = sewaTargetKembaliMap.get(idSewa);
+                if (tglKembaliActualDate != null && tanggalTargetKembali != null) {
+                    Calendar targetCal = Calendar.getInstance();
+                    targetCal.setTimeInMillis(tanggalTargetKembali.getTime());
+
+                    Calendar currentActualCal = Calendar.getInstance();
+                    currentActualCal.setTime(tglKembaliActualDate);
+                    currentActualCal.set(Calendar.HOUR_OF_DAY, (Integer) jam_dikembalikan.getValue());
+                    currentActualCal.set(Calendar.MINUTE, (Integer) menit_dikembalikan.getValue());
+                    currentActualCal.set(Calendar.SECOND, 0);
+                    currentActualCal.set(Calendar.MILLISECOND, 0);
+
+                    if (currentActualCal.compareTo(targetCal) > 0) {
+                        long diffMillis = currentActualCal.getTimeInMillis() - targetCal.getTimeInMillis();
+                        jumlahJamTelat = (long) Math.ceil((double)diffMillis / (1000.0 * 60 * 60));
+                    }
+                }
+
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Format angka untuk denda, jumlah dibayar, atau total biaya tidak valid. Pastikan hanya angka (dan titik desimal) yang dimasukkan.", "Kesalahan Input", JOptionPane.ERROR_MESSAGE);
+                return;
             }
 
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Format angka untuk denda, jumlah dibayar, atau total biaya tidak valid. Pastikan hanya angka (dan titik desimal) yang dimasukkan.", "Kesalahan Input", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            Connection kon = null;
+            PreparedStatement pst = null;
 
-        Connection kon = null;
-        PreparedStatement pst = null;
+            try {
+                Class.forName(driver);
+                kon = DriverManager.getConnection(database, user, pass);
 
-        try {
-            Class.forName(driver);
-            kon = DriverManager.getConnection(database, user, pass);
+                if (isSewaAlreadySelesai(idSewa, kon)) {
+                    JOptionPane.showMessageDialog(this, "Sewa ini sudah diselesaikan sebelumnya. Gunakan fitur Ubah jika ingin mengupdate data.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+                    return; 
+                }
 
-            if (isSewaAlreadySelesai(idSewa, kon)) {
-                JOptionPane.showMessageDialog(this, "Sewa ini sudah diselesaikan sebelumnya. Gunakan fitur Ubah jika ingin mengupdate data.", "Peringatan", JOptionPane.WARNING_MESSAGE);
-                return; 
+                String SQL = "INSERT INTO selesai ("
+                        + "id_sewa, tanggal_kembali_aktual, total_denda, rincian_denda, "
+                        + "total_biaya, jumlah_sudah_dibayar, status_pembayaran, jumlah_jam_telat" 
+                        + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+                pst = kon.prepareStatement(SQL);
+                pst.setInt(1, idSewa);
+                pst.setTimestamp(2, tanggalKembaliAktual);
+                pst.setDouble(3, totalDenda);
+                pst.setString(4, rincianDenda); 
+                pst.setDouble(5, totalBiaya);
+                pst.setDouble(6, jumlahSudahDibayar);
+                pst.setString(7, statusPembayaran);
+                pst.setLong(8, jumlahJamTelat);
+
+                int affectedRows = pst.executeUpdate(); 
+
+                if (affectedRows > 0) {
+                    JOptionPane.showMessageDialog(this, "Data selesai berhasil disimpan!", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+
+                    updateSewaStatus(idSewa, kon);
+
+                    settableload(); 
+                    membersihkan_teks(); 
+                    nonaktif_teks(); 
+                    loadPenyewaToComboBox(); 
+                } else {
+                    JOptionPane.showMessageDialog(this, "Gagal menyimpan data selesai.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+                }
+
+            }catch (Exception ex)
+            {
+                System.err.println(ex.getMessage());
             }
-
-            String SQL = "INSERT INTO selesai ("
-                    + "id_sewa, tanggal_kembali_aktual, total_denda, rincian_denda, "
-                    + "total_biaya, jumlah_sudah_dibayar, status_pembayaran, jumlah_jam_telat" 
-                    + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
-            pst = kon.prepareStatement(SQL);
-            pst.setInt(1, idSewa);
-            pst.setTimestamp(2, tanggalKembaliAktual);
-            pst.setDouble(3, totalDenda);
-            pst.setString(4, rincianDenda); 
-            pst.setDouble(5, totalBiaya);
-            pst.setDouble(6, jumlahSudahDibayar);
-            pst.setString(7, statusPembayaran);
-            pst.setLong(8, jumlahJamTelat);
-
-            int affectedRows = pst.executeUpdate(); 
-
-            if (affectedRows > 0) {
-                JOptionPane.showMessageDialog(this, "Data selesai berhasil disimpan!", "Informasi", JOptionPane.INFORMATION_MESSAGE);
-                
-                updateSewaStatus(idSewa, kon);
-                
-                settableload(); 
-                membersihkan_teks(); 
-                nonaktif_teks(); 
-                loadPenyewaToComboBox(); 
-            } else {
-                JOptionPane.showMessageDialog(this, "Gagal menyimpan data selesai.", "Peringatan", JOptionPane.WARNING_MESSAGE);
-            }
-
-        }catch (Exception ex)
-        {
-            System.err.println(ex.getMessage());
         }
     }//GEN-LAST:event_btn_simpanActionPerformed
 

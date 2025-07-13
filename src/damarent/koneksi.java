@@ -7,6 +7,7 @@
 package damarent;
 
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Properties;
 import javax.swing.JOptionPane;
 
@@ -24,7 +25,7 @@ public class koneksi {
         try {
             mypanel = new Properties();
             mypanel.load(new FileInputStream
-                    ("lib/database.ini")); 
+                    ("lib/database.ini"));
             strNamePanel = mypanel.getProperty(nmPanel);
         }catch(Exception e) {
             JOptionPane.showMessageDialog(null,
